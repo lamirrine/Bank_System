@@ -1,75 +1,39 @@
 package model.dao.impl;
 
+import config.DatabaseConnection;
 import model.dao.IBankDAO;
 import model.entities.Bank;
-import config.DatabaseConnection;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
 
 public class MySQLBankDAO implements IBankDAO {
 
+    private static final String GET_BANK_INFO = "SELECT bank_code, bank_name, transfer_fee_rate, support_phone, emergency_phone FROM bank LIMIT 1";
+
     @Override
-    public Bank findById(int id) throws Exception {
-        String sql = "SELECT * FROM banks WHERE id = ?";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Bank b = new Bank();
-                    b.setId(rs.getInt("id"));
-                    b.setName(rs.getString("name"));
-                    b.setCode(rs.getString("code"));
-                    b.setSupportPhone(rs.getString("support_phone"));
-                    return b;
-                }
+    public Bank getBankInfo() throws SQLException {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(GET_BANK_INFO);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                Bank bank = new Bank();
+                bank.setBankCode(rs.getString("bank_code"));
+                bank.setBankName(rs.getString("bank_name"));
+                bank.setTransferFeeRate(rs.getDouble("transfer_fee_rate"));
+                bank.setSupportPhone(rs.getString("support_phone"));
+                bank.setEmergencyPhone(rs.getString("emergency_phone"));
+                return bank;
             }
-        } catch (Exception ex) {
-            // table may not exist in demo DB; return null for demo
+            return null; // Retorna nulo se a tabela de configuração estiver vazia
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao carregar configurações do banco: " + e.getMessage());
+            throw e;
         }
-        return null;
     }
 
     @Override
-    public List<Bank> findAll() throws Exception {
-        List<Bank> list = new ArrayList<>();
-        String sql = "SELECT * FROM banks";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Bank b = new Bank();
-                b.setId(rs.getInt("id"));
-                b.setName(rs.getString("name"));
-                b.setCode(rs.getString("code"));
-                b.setSupportPhone(rs.getString("support_phone"));
-                list.add(b);
-            }
-        } catch (Exception ex) {
-            // ignore if table missing
-        }
-        return list;
-    }
-
-    @Override
-    public int save(Bank bank) throws Exception {
-        String sql = "INSERT INTO banks(name,code,support_phone) VALUES(?,?,?)";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, bank.getName());
-            ps.setString(2, bank.getCode());
-            ps.setString(3, bank.getSupportPhone());
-            ps.executeUpdate();
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) return rs.getInt(1);
-            }
-        } catch (Exception ex) {
-            // ignore for demo
-        }
-        return -1;
+    public void updateInfo(Bank bank) throws SQLException {
+        // Lógica JDBC: UPDATE nas configurações (uso para ADMIN)
     }
 }

@@ -1,26 +1,28 @@
 package model.entities;
 
-public class Employee {
-    private int id;
-    private String name;
-    private String role;
-    private int agencyId;
+import model.enums.AccessLevel; // Importa o Enum
+import java.util.Date;
 
-    public Employee() {}
+public class Employee extends User {
 
-    public Employee(int id, String name, String role, int agencyId) {
-        this.id = id; this.name = name; this.role = role; this.agencyId = agencyId;
+    private AccessLevel accessLevel;
+    private boolean isSupervisor;
+
+    // Construtor Completo
+    public Employee(int userId, String firstName, String lastName, String email, String phone, String address, String passHash, Date registrationDate, AccessLevel accessLevel, boolean isSupervisor) {
+        super(userId, firstName, lastName, email, phone, address, passHash, registrationDate);
+        this.accessLevel = accessLevel;
+        this.isSupervisor = isSupervisor;
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    // Construtor Padrão
+    public Employee() {
+        super();
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
-
-    public int getAgencyId() { return agencyId; }
-    public void setAgencyId(int agencyId) { this.agencyId = agencyId; }
+    // --- Getters e Setters ---
+    public AccessLevel getAccessLevel() { return accessLevel; }
+    public void setAccessLevel(AccessLevel accessLevel) { this.accessLevel = accessLevel; }
+    public boolean isSupervisor() { return isSupervisor; }
+    public void setSupervisor(boolean supervisor) { isSupervisor = supervisor; }
 }

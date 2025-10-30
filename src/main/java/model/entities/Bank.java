@@ -1,26 +1,34 @@
 package model.entities;
 
 public class Bank {
-    private int id;
-    private String name;
-    private String code;
+
+    private String bankCode;
+    private String bankName;
+    private double transferFeeRate; // Taxa percentual para transferências externas (Ex: 0.005 para 0.5%)
     private String supportPhone;
+    private String emergencyPhone;
 
-    public Bank() {}
-
-    public Bank(int id, String name, String code, String supportPhone) {
-        this.id = id; this.name = name; this.code = code; this.supportPhone = supportPhone;
+    // Construtor Completo
+    public Bank(String bankCode, String bankName, double transferFeeRate, String supportPhone, String emergencyPhone) {
+        this.bankCode = bankCode;
+        this.bankName = bankName;
+        this.transferFeeRate = transferFeeRate;
+        this.supportPhone = supportPhone;
+        this.emergencyPhone = emergencyPhone;
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    // Construtor Padrão
+    public Bank() {}
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
-
+    // --- Getters e Setters ---
+    public String getBankCode() { return bankCode; }
+    public void setBankCode(String bankCode) { this.bankCode = bankCode; }
+    public String getBankName() { return bankName; }
+    public void setBankName(String bankName) { this.bankName = bankName; }
+    public double getTransferFeeRate() { return transferFeeRate; }
+    public void setTransferFeeRate(double transferFeeRate) { this.transferFeeRate = transferFeeRate; }
     public String getSupportPhone() { return supportPhone; }
     public void setSupportPhone(String supportPhone) { this.supportPhone = supportPhone; }
+    public String getEmergencyPhone() { return emergencyPhone; }
+    public void setEmergencyPhone(String emergencyPhone) { this.emergencyPhone = emergencyPhone; }
 }

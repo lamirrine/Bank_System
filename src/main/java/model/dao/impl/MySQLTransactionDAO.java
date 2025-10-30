@@ -1,57 +1,57 @@
 package model.dao.impl;
 
+import config.DatabaseConnection;
 import model.dao.ITransactionDAO;
 import model.entities.Transaction;
-import config.DatabaseConnection;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
+import java.sql.*;
 import java.util.Date;
 import java.util.List;
 
 public class MySQLTransactionDAO implements ITransactionDAO {
 
-    @Override
-    public int save(Transaction tx) throws Exception {
-        String sql = "INSERT INTO transactions(account_id,type,amount,description,balance_after) VALUES(?,?,?,?,?)";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, tx.getAccountId());
-            ps.setString(2, tx.getType());
-            ps.setDouble(3, tx.getAmount());
-            ps.setString(4, tx.getDescription());
-            ps.setDouble(5, tx.getBalanceAfter());
-            ps.executeUpdate();
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) return rs.getInt(1);
-            }
-        }
-        return -1;
-    }
+    private static final String SAVE_TRANSACTION =
+            "INSERT INTO transaction (type, amount, timestamp, status, description, source_account_id, destination_account_id, resulting_balance, fee_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     @Override
-    public List<Transaction> findByAccountId(int accountId) throws Exception {
-        String sql = "SELECT * FROM transactions WHERE account_id = ? ORDER BY created_at DESC";
-        List<Transaction> list = new ArrayList<>();
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, accountId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Transaction t = new Transaction();
-                    t.setId(rs.getInt("id"));
-                    t.setAccountId(rs.getInt("account_id"));
-                    t.setType(rs.getString("type"));
-                    t.setAmount(rs.getDouble("amount"));
-                    t.setDescription(rs.getString("description"));
-                    t.setCreatedAt(new Date(rs.getTimestamp("created_at").getTime()));
-                    t.setBalanceAfter(rs.getDouble("balance_after"));
-                    list.add(t);
-                }
+    public void save(Transaction transaction) throws SQLException {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SAVE_TRANSACTION, Statement.RETURN_GENERATED_KEYS)) {
+
+            // Mapeamento dos atributos do objeto Transaction para a Query SQL
+            stmt.setString(1, transaction.getType().name()); // Usar o nome do Enum
+            stmt.setDouble(2, transaction.getAmount());
+            stmt.setTimestamp(3, new Timestamp(transaction.getTimestamp().getTime()));
+            stmt.setString(4, transaction.getStatus().name());
+            stmt.setString(5, transaction.getDescription());
+            stmt.setInt(6, transaction.getSourceAccountId());
+
+            // Trata o campo destinationAccountId que pode ser 0/null
+            if (transaction.getDestinationAccountId() > 0) {
+                stmt.setInt(7, transaction.getDestinationAccountId());
+            } else {
+                stmt.setNull(7, Types.INTEGER);
             }
+
+            stmt.setDouble(8, transaction.getResultingBalance());
+            stmt.setDouble(9, transaction.getFeeAmount());
+
+            stmt.executeUpdate();
+
+            // Opcional: Recuperar o ID gerado para atualizar o objeto Transaction
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                transaction.setTransactionId(rs.getInt(1));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao salvar transação: " + e.getMessage());
+            throw e;
         }
-        return list;
     }
+
+    // ... Implementação dos outros métodos (findByAccountId, findRecentByAccountId)
+    @Override
+    public List<Transaction> findByAccountId(int accountId, Date start, Date end) throws SQLException { return null; }
+    @Override
+    public List<Transaction> findRecentByAccountId(int accountId, int limit) throws SQLException { return null; }
 }

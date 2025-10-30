@@ -1,75 +1,44 @@
 package model.dao.impl;
 
+import config.DatabaseConnection;
 import model.dao.IAgencyDAO;
 import model.entities.Agency;
-import config.DatabaseConnection;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MySQLAgencyDAO implements IAgencyDAO {
 
-    @Override
-    public Agency findById(int id) throws Exception {
-        String sql = "SELECT * FROM agencies WHERE id = ?";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Agency a = new Agency();
-                    a.setId(rs.getInt("id"));
-                    a.setName(rs.getString("name"));
-                    a.setAddress(rs.getString("address"));
-                    a.setPhone(rs.getString("phone"));
-                    return a;
-                }
-            }
-        } catch (Exception ex) {
-            // table may not exist
-        }
-        return null;
-    }
+    private static final String FIND_ALL = "SELECT * FROM agency";
 
     @Override
-    public List<Agency> findAll() throws Exception {
-        List<Agency> list = new ArrayList<>();
-        String sql = "SELECT * FROM agencies";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+    public List<Agency> findAll() throws SQLException {
+        List<Agency> agencies = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_ALL);
+             ResultSet rs = stmt.executeQuery()) {
+
             while (rs.next()) {
-                Agency a = new Agency();
-                a.setId(rs.getInt("id"));
-                a.setName(rs.getString("name"));
-                a.setAddress(rs.getString("address"));
-                a.setPhone(rs.getString("phone"));
-                list.add(a);
+                Agency agency = new Agency();
+                agency.setAgencyId(rs.getInt("agency_id"));
+                agency.setName(rs.getString("name"));
+                // ... Mapear todos os atributos (LocalTime requer cuidado com conversão de TIME SQL)
+                agencies.add(agency);
             }
-        } catch (Exception ex) {
-            // ignore
+            return agencies;
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar agências: " + e.getMessage());
+            throw e;
         }
-        return list;
     }
 
+    // ... Implementação dos outros métodos
     @Override
-    public int save(Agency agency) throws Exception {
-        String sql = "INSERT INTO agencies(name,address,phone) VALUES(?,?,?)";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, agency.getName());
-            ps.setString(2, agency.getAddress());
-            ps.setString(3, agency.getPhone());
-            ps.executeUpdate();
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) return rs.getInt(1);
-            }
-        } catch (Exception ex) {
-            // ignore
-        }
-        return -1;
-    }
+    public Agency findById(int agencyId) throws SQLException { return null; }
+    @Override
+    public void save(Agency agency) throws SQLException { /* Lógica de INSERT */ }
+    @Override
+    public void update(Agency agency) throws SQLException { /* Lógica de UPDATE */ }
 }

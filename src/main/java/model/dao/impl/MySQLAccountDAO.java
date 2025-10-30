@@ -1,97 +1,64 @@
 package model.dao.impl;
 
+import config.DatabaseConnection;
 import model.dao.IAccountDAO;
 import model.entities.Account;
-import config.DatabaseConnection;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
+import model.enums.AccountStatus;
+import java.sql.*;
 import java.util.List;
 
 public class MySQLAccountDAO implements IAccountDAO {
 
+    private static final String UPDATE_BALANCE = "UPDATE account SET balance = ? WHERE account_id = ?";
+
+    private static final String GET_PIN_HASH = "SELECT transaction_pin_hash FROM account WHERE account_id = ?";
+
     @Override
-    public Account findByAccountNumber(String accountNumber) throws Exception {
-        String sql = "SELECT * FROM accounts WHERE account_number = ?";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, accountNumber);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Account a = map(rs);
-                    return a;
-                }
+    public void updateBalance(int accountId, double newBalance) throws SQLException {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(UPDATE_BALANCE)) {
+
+            stmt.setDouble(1, newBalance);
+            stmt.setInt(2, accountId);
+
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new SQLException("Nenhuma conta encontrada para o ID: " + accountId);
             }
+
+        } catch (SQLException e) {
+            System.err.println("Erro crítico ao atualizar saldo: " + e.getMessage());
+            throw e; // Lançar a exceção para que o Service possa tratá-la (transação JDBC)
         }
-        return null;
     }
 
     @Override
-    public List<Account> findByOwnerId(int ownerId) throws Exception {
-        String sql = "SELECT * FROM accounts WHERE owner_id = ?";
-        List<Account> list = new ArrayList<>();
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, ownerId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(map(rs));
-                }
+    public String getPinHash(int accountId) throws SQLException {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(GET_PIN_HASH)) {
+
+            stmt.setInt(1, accountId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("transaction_pin_hash");
             }
+            return null;
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar PIN hash: " + e.getMessage());
+            throw e;
         }
-        return list;
     }
 
     @Override
-    public Account findById(int id) throws Exception {
-        String sql = "SELECT * FROM accounts WHERE id = ?";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return map(rs);
-            }
-        }
-        return null;
-    }
-
+    public Account findById(int accountId) throws SQLException { return null; }
     @Override
-    public int save(Account account) throws Exception {
-        String sql = "INSERT INTO accounts(account_number,type,balance,owner_id) VALUES(?,?,?,?)";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, account.getAccountNumber());
-            ps.setString(2, account.getType());
-            ps.setDouble(3, account.getBalance());
-            if (account.getOwnerId() > 0) ps.setInt(4, account.getOwnerId()); else ps.setNull(4, java.sql.Types.INTEGER);
-            ps.executeUpdate();
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) return rs.getInt(1);
-            }
-        }
-        return -1;
-    }
-
+    public Account findByAccountNumber(String accountNumber) throws SQLException { return null; }
     @Override
-    public void updateBalance(int accountId, double newBalance) throws Exception {
-        String sql = "UPDATE accounts SET balance = ? WHERE id = ?";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setDouble(1, newBalance);
-            ps.setInt(2, accountId);
-            ps.executeUpdate();
-        }
-    }
-
-    private Account map(ResultSet rs) throws Exception {
-        Account a = new Account();
-        a.setId(rs.getInt("id"));
-        a.setAccountNumber(rs.getString("account_number"));
-        a.setType(rs.getString("type"));
-        a.setBalance(rs.getDouble("balance"));
-        a.setOwnerId(rs.getInt("owner_id"));
-        return a;
-    }
+    public List<Account> findByCustomerId(int customerId) throws SQLException { return null; }
+    @Override
+    public void save(Account account) throws SQLException { /* Lógica de SAVE */ }
+    @Override
+    public void updateStatus(int accountId, AccountStatus status) throws SQLException { /* Lógica de UPDATE STATUS */ }
 }
