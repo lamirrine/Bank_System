@@ -5,6 +5,15 @@ import model.dao.IUserDAO;
 import model.entities.User;
 import model.entities.Customer; // Necessário para instanciar, pois User é abstrato
 import java.sql.*;
+import java.util.Date;
+// IMPORTAÇÕES JDBC:
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+// IMPORTAÇÃO CORRETA PARA ENVIAR DATA E HORA AO BANCO DE DADOS:
+import java.sql.Timestamp;
 
 public class MySQLUserDAO implements IUserDAO {
 
@@ -41,9 +50,45 @@ public class MySQLUserDAO implements IUserDAO {
         }
     }
 
+
     @Override
     public void save(User user) throws SQLException {
-        // Implementação complexa: Inserir e obter o ID gerado para ser usado em CustomerDAO/EmployeeDAO
+
+        String sql = "INSERT INTO user (first_name, last_name, email, phone, address, pass_hash, registration_date, user_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, user.getFirstName());
+            stmt.setString(2, user.getLastName());
+            stmt.setString(3, user.getEmail());
+            stmt.setString(4, user.getPhone());
+            stmt.setString(5, user.getAddress()); // <-- CORRIGIDO: Campo adicionado
+            stmt.setString(6, user.getPassHash());
+
+            java.util.Date dateToSave = user.getRegistrationDate();
+            if (dateToSave == null) {
+                dateToSave = new java.util.Date();
+            }
+            stmt.setTimestamp(7, new java.sql.Timestamp(dateToSave.getTime()));
+
+            String userType = user instanceof Customer ? "CUSTOMER" : "EMPLOYEE";
+            stmt.setString(8, userType);
+
+            int affectedRows = stmt.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new SQLException("Falha ao criar usuário, nenhuma linha afetada.");
+            }
+
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    user.setUserId(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException("Falha ao criar usuário, não foi obtido o ID gerado.");
+                }
+            }
+        }
     }
 
     @Override

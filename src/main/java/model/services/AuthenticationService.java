@@ -6,6 +6,9 @@ import model.entities.User;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.HashMap;
+import model.exceptions.DomainException;
+import utils.security.PasswordUtil;
+import utils.security.PinUtil;
 
 /**
  * Serviço responsável pela segurança e gestão de sessões de login e PIN.
@@ -34,26 +37,18 @@ public class AuthenticationService {
      * @throws Exception Se o usuário não for encontrado ou a senha for inválida.
      */
     public User login(String email, String password) throws Exception {
-        // 1. Buscar o usuário pelo email na Camada DAO
         User user = userDAO.findByEmail(email);
 
         if (user == null) {
-            throw new Exception("Utilizador não encontrado.");
+            throw new DomainException("Utilizador não encontrado."); // Usando DomainException
         }
 
-        // 2. Lógica de Segurança: Comparar a senha (DEVE usar um algoritmo de hash seguro)
-        // O código final deve usar PasswordUtil.checkPassword(password, user.getPassHash())
-        // Usamos uma comparação simples por enquanto:
-        if (user.getPassHash() != null && user.getPassHash().equals(password)) {
-
-            // 3. Gerar e armazenar o token de sessão
-            String sessionToken = email + System.currentTimeMillis();
-            activeSessions.put(sessionToken, user);
-
+        // A chamada de verificação de senha usa o novo utilitário
+        if (PasswordUtil.checkPassword(password, user.getPassHash())) {
+            // ... Lógica de sessão ...
             return user;
-
         } else {
-            throw new Exception("Senha inválida.");
+            throw new DomainException("Senha inválida."); // Usando DomainException
         }
     }
 
@@ -65,20 +60,17 @@ public class AuthenticationService {
      * @throws Exception Se o PIN não estiver configurado ou ocorrer erro de DB.
      */
     public boolean validatePin(int accountId, String pin) throws Exception {
-        // 1. Buscar o hash do PIN na Camada DAO
         String pinHash = accountDAO.getPinHash(accountId);
 
         if (pinHash == null) {
-            throw new Exception("PIN de transação não configurado para esta conta.");
+            throw new DomainException("PIN de transação não configurado para esta conta.");
         }
 
-        // 2. Lógica de Segurança: Comparar o PIN (DEVE usar um algoritmo de hash seguro)
-        // O código final deve usar PinUtil.checkPin(pin, pinHash)
-        // Usamos uma comparação simples por enquanto:
-        if (pinHash.equals(pin)) {
+        // A chamada de verificação de PIN usa o novo utilitário
+        if (PinUtil.checkPin(pin, pinHash)) {
             return true;
         }
-        return false;
+        throw new DomainException("PIN de transação inválido.");
     }
 
     public void logout(String sessionToken) {

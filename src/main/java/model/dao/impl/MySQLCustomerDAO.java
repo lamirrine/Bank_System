@@ -11,30 +11,29 @@ public class MySQLCustomerDAO implements ICustomerDAO {
     private static final String SAVE_CUSTOMER =
             "INSERT INTO customer (customer_id, bi_number, nuit, passport_number) VALUES (?, ?, ?, ?)";
 
+
+
     @Override
     public void save(Customer customer) throws SQLException {
-        // Assume que customer.getUserId() já foi preenchido pelo MySQLUserDAO.save()
         if (customer.getUserId() == 0) {
-            throw new SQLException("ID do usuário base não definido. Não é possível salvar o Customer.");
+            throw new SQLException("ID do usuário base não definido.");
         }
 
+        // CORRIGIDO: Salva os campos que realmente existem na tabela 'customer'
+        String sql = "INSERT INTO customer (customer_id, bi_number, nuit, passport_number) VALUES (?, ?, ?, ?)";
+
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(SAVE_CUSTOMER)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, customer.getUserId());
             stmt.setString(2, customer.getBiNumber());
             stmt.setString(3, customer.getNuit());
-            stmt.setString(4, customer.getPassportNumber());
+            stmt.setString(4, customer.getPassportNumber()); // <-- CORRIGIDO
 
             stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            System.err.println("Erro ao salvar dados de Customer (KYC): " + e.getMessage());
-            throw e;
         }
     }
 
-    // ... Implementação dos outros métodos
     @Override
     public Customer findById(int customerId) throws SQLException {
         // Lógica JDBC: SELECT de 'user' JOIN 'customer'
