@@ -1,0 +1,49 @@
+BancoDigital/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   ├── config/              <-- 🛠️ Configurações Técnicas
+│   │   │   │   └── DatabaseConnection.java  (Conexão JDBC com MySQL)
+│   │   │   │
+│   │   │   ├── model/             <-- 💾 Camada MODELO
+│   │   │   │   ├── entities/      <-- 1. Classes de Entidade (POJOs)
+│   │   │   │   │   ├── User.java
+│   │   │   │   │   ├── Customer.java
+│   │   │   │   │   ├── Account.java
+│   │   │   │   │   └── ... outras classes (Bank, Agency, Transaction)
+│   │   │   │   │
+│   │   │   │   ├── enums/         <-- Enums
+│   │   │   │   │   ├── AccountType.java
+│   │   │   │   │   ├── TransactionStatus.java
+│   │   │   │   │   └── ... outras enums
+│   │   │   │   │
+│   │   │   │   ├── dao/           <-- 2. Interfaces DAO (Contratos)
+│   │   │   │   │   ├── IUserDAO.java
+│   │   │   │   │   ├── IAccountDAO.java
+│   │   │   │   │   └── ... outras interfaces DAO
+│   │   │   │   │
+│   │   │   │   └── services/      <-- 3. Classes de Serviço (Lógica de Negócio)
+│   │   │   │   │   ├── AccountService.java
+│   │   │   │   │   ├── AuthenticationService.java
+│   │   │   │   │   └── ... outros serviços
+│   │   │   │
+│   │   │   │   └── dao/impl/      <-- 2.b. Implementações Concretas DAO (JDBC)
+│   │   │   │       ├── MySQLUserDAO.java
+│   │   │   │       ├── MySQLAccountDAO.java
+│   │   │   │       └── ... outras implementações
+│   │   │   │
+│   │   │   ├── controller/        <-- 4. Camada Controlador
+│   │   │   │   └── AccountController.java (Lida com requisições da View)
+│   │   │   │
+│   │   │   └── view/              <-- 5. Camada de Apresentação
+│   │   │       ├── MainApplication.java (Inicializador)
+│   │   │       └── frames/        (Classes Java Swing/UI)
+│   │
+│   └── resources/
+│       ├── db/
+│       │   └── ddl_script.sql     (Comandos SQL para criar as tabelas)
+│       └── i18n/                  (Arquivos para internacionalização, se necessário)
+│
+└── lib/                             <-- 📚 Bibliotecas Externas
+    └── mysql-connector-j.jar
+    └── itextpdf.jar (Para gerar extratos em PDF)
