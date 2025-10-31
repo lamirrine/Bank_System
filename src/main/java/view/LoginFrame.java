@@ -4,7 +4,6 @@ import model.entities.User;
 import model.exceptions.InvalidCredentialsException;
 import model.services.AuthenticationService;
 import model.services.CustomerService;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -13,7 +12,6 @@ import java.awt.event.ActionListener;
 
 public class LoginFrame extends JFrame {
 
-    // Campos FINAL: Inicializados no construtor. (Correção do erro 5)
     private final AuthenticationService authService;
     private final CustomerService customerService;
 
@@ -39,8 +37,8 @@ public class LoginFrame extends JFrame {
         // 1. Configuração da Janela
         setTitle("Banco Digital - Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(450, 350));
-        setSize(450, 350);
+        setMinimumSize(new Dimension(550, 450));
+        setSize(550, 450);
 
         // 2. Painel de Centramento (GridBagLayout para manter o formulário no centro)
         JPanel centeringWrapper = new JPanel(new GridBagLayout());

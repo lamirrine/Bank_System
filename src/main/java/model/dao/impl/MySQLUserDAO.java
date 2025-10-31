@@ -6,13 +6,11 @@ import model.entities.User;
 import model.entities.Customer; // Necessário para instanciar, pois User é abstrato
 import java.sql.*;
 import java.util.Date;
-// IMPORTAÇÕES JDBC:
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-// IMPORTAÇÃO CORRETA PARA ENVIAR DATA E HORA AO BANCO DE DADOS:
 import java.sql.Timestamp;
 
 public class MySQLUserDAO implements IUserDAO {
