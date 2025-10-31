@@ -2,55 +2,78 @@ package model.entities;
 
 import java.util.Date;
 
-public abstract class User {
+public class User {
 
-    private int userId;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String phone;
-    private String address;
-    private String passHash;
-    private Date registrationDate;
+    // Campos principais (Comuns a TODOS os usuários: Cliente e Funcionário)
+    protected int userId;
+    protected String firstName;
+    protected String lastName;
+    protected String email;
+    protected String phone;
+    protected String passHash;
+    protected String address;       // <-- CORREÇÃO: ENDEREÇO ESTÁ AQUI
+    protected String userType;      // <-- userType ADICIONADO PARA O LOGIN
+    protected Date registrationDate;
 
-    // Construtor Completo
-    public User(int userId, String firstName, String lastName, String email, String phone, String address, String passHash, Date registrationDate) {
+    // Construtor completo (para carregamento do DB)
+    public User(int userId, String firstName, String lastName, String email, String phone, String passHash, String address, String userType) {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
-        this.address = address;
         this.passHash = passHash;
-        this.registrationDate = registrationDate;
+        this.address = address;       // Inicializado
+        this.userType = userType;     // Inicializado
+        this.registrationDate = new Date();
     }
 
-    public User() {}
-
-    // Método Auxiliar: Nome Completo (útil para a View)
-    public String getFullName() {
-        return firstName + " " + lastName;
+    // Construtor usado no Registo (ID é gerado no DB)
+    public User(String firstName, String lastName, String email, String phone, String passHash, String address, String userType) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phone = phone;
+        this.passHash = passHash;
+        this.address = address;       // Inicializado
+        this.userType = userType;     // Inicializado
+        this.registrationDate = new Date();
     }
 
-    // --- Getters e Setters ---
+    public User() {
+    }
 
-    // Essenciais para Login
+    // Getters e Setters
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
+    }
+
     public int getUserId() { return userId; }
     public void setUserId(int userId) { this.userId = userId; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public String getPassHash() { return passHash; }
-    public void setPassHash(String passHash) { this.passHash = passHash; }
-
-    // Informações Pessoais
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
+    public String getFullName() { return firstName + " " + lastName; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public String getPassHash() { return passHash; }
+    public void setPassHash(String passHash) { this.passHash = passHash; }
     public Date getRegistrationDate() { return registrationDate; }
     public void setRegistrationDate(Date registrationDate) { this.registrationDate = registrationDate; }
 }
