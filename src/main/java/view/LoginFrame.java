@@ -3,6 +3,7 @@ package view;
 import model.entities.User;
 import model.exceptions.InvalidCredentialsException;
 import model.services.AuthenticationService;
+import model.services.CustomerService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,69 +13,93 @@ import java.awt.event.ActionListener;
 
 public class LoginFrame extends JFrame {
 
-    // NOTE: O authService será injetado pelo main.App.java
+    // Campos FINAL: Inicializados no construtor. (Correção do erro 5)
     private final AuthenticationService authService;
+    private final CustomerService customerService;
 
-    // Componentes de Input
     private final JComboBox<String> roleSelector;
     private final JTextField emailField;
     private final JPasswordField passwordField;
     private final JButton loginButton;
 
-    // Constantes de Estilo
-    private static final Color PRIMARY_COLOR = new Color(50, 150, 250); // Azul
-    private static final Color BACKGROUND_COLOR = new Color(245, 245, 245); // Fundo Claro
+    private static final Color PRIMARY_COLOR = new Color(50, 150, 250);
+    private static final Color BACKGROUND_COLOR = new Color(245, 245, 245);
 
-    public LoginFrame(AuthenticationService authService) {
+    // Construtor deve aceitar AMBOS os serviços
+    public LoginFrame(AuthenticationService authService, CustomerService customerService) {
         this.authService = authService;
+        this.customerService = customerService;
 
-        // 1. Configuração da Janela
-        setTitle("Banco Digital - Login");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(450, 350);
-
-        // 2. Painel Principal (Layout Vertical)
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBackground(BACKGROUND_COLOR);
-        mainPanel.setBorder(new EmptyBorder(30, 40, 30, 40));
-
-        // 3. Título
-        JLabel titleLabel = new JLabel("Bem-vindo de volta", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setBorder(new EmptyBorder(0, 0, 20, 0));
-
-        // 4. Painel de Formulário (GridLayout 4 linhas x 2 colunas para rótulo e campo)
-        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 10));
-        formPanel.setBackground(BACKGROUND_COLOR);
-
-        // --- SELETOR DE PAPEL ---
+        // Inicialização dos campos (Correção do erro 5 - Image 4)
         roleSelector = new JComboBox<>(new String[]{"CLIENTE", "FUNCIONÁRIO"});
-        roleSelector.setBackground(Color.WHITE);
-        formPanel.add(new JLabel("Acessar como:"));
-        formPanel.add(roleSelector);
-
-        // --- CAMPOS DE INPUT COM RÓTULOS ---
         emailField = new JTextField(20);
         passwordField = new JPasswordField(20);
         loginButton = createStyledButton("ENTRAR NA CONTA");
 
-        formPanel.add(new JLabel("Email/Conta:"));
-        formPanel.add(emailField);
+        // 1. Configuração da Janela
+        setTitle("Banco Digital - Login");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setMinimumSize(new Dimension(450, 350));
+        setSize(450, 350);
 
-        formPanel.add(new JLabel("Senha:"));
-        formPanel.add(passwordField);
+        // 2. Painel de Centramento (GridBagLayout para manter o formulário no centro)
+        JPanel centeringWrapper = new JPanel(new GridBagLayout());
+        centeringWrapper.setBackground(BACKGROUND_COLOR);
 
-        formPanel.add(new JLabel("")); // Espaçador
-        formPanel.add(loginButton);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(30, 40, 30, 40);
+        centeringWrapper.add(createFormPanel(), gbc);
 
+        add(centeringWrapper, BorderLayout.CENTER);
 
-        // 5. Adicionar Componentes ao Painel Principal
+        loginButton.addActionListener(new LoginActionListener());
+
+        setLocationRelativeTo(null);
+    }
+
+    private JPanel createFormPanel() {
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
+                new EmptyBorder(30, 40, 30, 40)
+        ));
+
+        // Título e Sub-título
+        JLabel titleLabel = new JLabel("Bem-vindo de volta", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setBorder(new EmptyBorder(0, 0, 20, 0));
         mainPanel.add(titleLabel);
-        mainPanel.add(formPanel);
 
-        // --- LINK DE REGISTO (Cadastre-se aqui) ---
+        JLabel subtitleLabel = new JLabel("Entre na sua conta para continuar", SwingConstants.CENTER);
+        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        subtitleLabel.setBorder(new EmptyBorder(0, 0, 10, 0));
+        mainPanel.add(subtitleLabel);
+
+        // Painel de Inputs (GridLayout)
+        JPanel inputPanel = new JPanel(new GridLayout(4, 2, 10, 10));
+        inputPanel.setBackground(Color.WHITE);
+
+        roleSelector.setBackground(BACKGROUND_COLOR);
+        inputPanel.add(new JLabel("Acessar como:"));
+        inputPanel.add(roleSelector);
+
+        inputPanel.add(new JLabel("Email/Conta:"));
+        inputPanel.add(emailField);
+
+        inputPanel.add(new JLabel("Senha:"));
+        inputPanel.add(passwordField);
+
+        inputPanel.add(new JLabel(""));
+        inputPanel.add(loginButton);
+
+        mainPanel.add(inputPanel);
+
+        // Link de Registo
         JLabel registerLink = new JLabel("<html>Não tem uma conta? <u>Cadastre-se aqui</u></html>");
         registerLink.setFont(new Font("Arial", Font.PLAIN, 12));
         registerLink.setForeground(PRIMARY_COLOR);
@@ -84,22 +109,21 @@ public class LoginFrame extends JFrame {
         registerLink.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                // ATENÇÃO: O CustomerService deve ser passado, mas é 'null' para fins de compilação da GUI
-                new CustomerRegistrationFrame(null).setVisible(true);
+                // Passa a instância injetada (Corrige NullPointerException - Image 3)
+                if (customerService != null) {
+                    new CustomerRegistrationFrame(customerService).setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(LoginFrame.this, "Serviço de Registo não inicializado. Verifique App.java", "Erro Crítico", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
-        mainPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Espaço
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         mainPanel.add(registerLink);
 
-        add(mainPanel, BorderLayout.CENTER);
-
-        loginButton.addActionListener(new LoginActionListener());
-
-        setLocationRelativeTo(null);
+        return mainPanel;
     }
 
-    // Método auxiliar de estilo (mantido)
     private JButton createStyledButton(String text) {
         JButton button = new JButton(text);
         button.setBackground(PRIMARY_COLOR);
@@ -111,7 +135,6 @@ public class LoginFrame extends JFrame {
     }
 
 
-    // Lógica de Ação com Redirecionamento e Autorização
     private class LoginActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -120,52 +143,40 @@ public class LoginFrame extends JFrame {
             String password = new String(passwordField.getPassword());
 
             if (email.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(LoginFrame.this,
-                        "Por favor, preencha o Email/Nº de Conta e a Senha.",
-                        "Erro",
-                        JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(LoginFrame.this, "Por favor, preencha o Email/Nº de Conta e a Senha.", "Erro", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             try {
-                // 1. Tenta fazer o login usando o serviço (que busca o userType no DB)
-                User user = authService.login(email, password); // Requer authService != null
+                User user = authService.login(email, password);
+                String userType = user.getUserType(); // DB retorna CUSTOMER ou EMPLOYEE
 
-                // 2. Obtém o tipo de usuário do DB
-                String userType = user.getUserType();
+                // Lógica de Autorização (Correção do erro de mapeamento - Image 2)
+                String expectedType = selectedRole.equals("CLIENTE") ? "CUSTOMER" : "EMPLOYEE";
 
-                // 3. Verificação de Autorização: O papel do DB deve ser consistente com o papel escolhido na tela
-                if (!selectedRole.equalsIgnoreCase(userType)) {
+                if (!expectedType.equalsIgnoreCase(userType)) {
                     JOptionPane.showMessageDialog(LoginFrame.this,
                             "A autenticação foi bem-sucedida, mas o seu perfil de '" + userType + "' não corresponde ao acesso escolhido ('" + selectedRole + "').",
-                            "Erro de Autorização",
+                            "Erro de Autorização: Perfil Incorreto",
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                dispose(); // Fechar a janela de login
+                dispose();
 
-                // 4. Redirecionamento
                 if ("CLIENTE".equalsIgnoreCase(selectedRole)) {
-                    // Requer a classe ClientDashboardFrame
                     new ClientDashboardFrame(user).setVisible(true);
 
                 } else if ("FUNCIONÁRIO".equalsIgnoreCase(selectedRole)) {
-                    // Requer a classe EmployeeManagementFrame
-                    new EmployeeManagementFrame(user).setVisible(true);
+                    // Substitua por new EmployeeManagementFrame(user).setVisible(true); quando estiver pronto
+                    JOptionPane.showMessageDialog(LoginFrame.this, "Redirecionando para Painel de Funcionário (Placeholder).", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
 
                 }
 
             } catch (InvalidCredentialsException ex) {
-                JOptionPane.showMessageDialog(LoginFrame.this,
-                        "Credenciais inválidas: Email ou senha incorreta.",
-                        "Falha de Login",
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(LoginFrame.this, "Credenciais inválidas: Email ou senha incorreta.", "Falha de Login", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(LoginFrame.this,
-                        "Erro interno. Tente novamente. Certifique-se de que o Database está a correr.",
-                        "Erro Crítico",
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(LoginFrame.this, "Erro interno. Verifique a consola.", "Erro Crítico", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
             }
         }

@@ -15,7 +15,11 @@ public class CustomerService {
     private IUserDAO userDAO;
     private ICustomerDAO customerDAO;
 
+
     // Construtor para Injeção de Dependência
+    public CustomerService(IUserDAO userDAO) {
+        this.userDAO = userDAO;
+    }
     public CustomerService(IUserDAO userDAO, ICustomerDAO customerDAO) {
         this.userDAO = userDAO;
         this.customerDAO = customerDAO;

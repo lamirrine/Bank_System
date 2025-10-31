@@ -1,49 +1,37 @@
 package main;
 
-// ... (todas as suas importações DAO/Service/Config)
-
-import model.dao.IAccountDAO;
-import model.dao.IUserDAO;
+import model.services.CustomerService;
 import model.services.AuthenticationService;
-import model.services.CustomerService; // Necessário para inicializar
-import view.LoginFrame; // NOVO: Importar a GUI
+import model.dao.IUserDAO;
+import model.dao.impl.MySQLUserDAO; // ASSUMIMOS QUE ESTA É A CLASSE QUE IMPLEMENTA IUserDAO
+import view.LoginFrame;
 
-import javax.swing.*;
-
-// ... (todas as suas classes DAO/Service/Config)
+import javax.swing.SwingUtilities;
 
 public class App {
 
-    public static void main(String[] args) {
-        // ... (Teste de Conexão com DB)
+    private final CustomerService customerService;
+    private final AuthenticationService authenticationService;
 
-        // Inicialização dos DAOs (assumindo que está correto)
-        IUserDAO userDAO = new model.dao.impl.MySQLUserDAO();
-        // ... outros DAOs
-        IAccountDAO accountDAO = new model.dao.impl.MySQLAccountDAO();
+    public App() {
+        // 1. Criação do DAO (Instancia a classe CONCRETA)
+        // Se a sua implementação tem um nome diferente, altere "MySQLUserDAO"
+        IUserDAO userDAO = new MySQLUserDAO();
 
-        // Inicialização dos Serviços (assumindo que está correto)
-        CustomerService customerService = new CustomerService(userDAO, new model.dao.impl.MySQLCustomerDAO());
-        AuthenticationService authenticationService = new AuthenticationService(userDAO, accountDAO);
-
-        // --- LANÇAR A GUI NA THREAD DE EVENTOS DE SWING (EDT) ---
-        SwingUtilities.invokeLater(() -> {
-            LoginFrame loginFrame = new LoginFrame(authenticationService);
-            loginFrame.setVisible(true);
-        });
-
-        try {
-            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            // Fallback para o Look and Feel padrão (Metal/Cross-platform)
-        }
-
-        // O código de simulação pode ser apagado/comentado
-        // ...
+        // 2. Injeção de Dependência: Passa o DAO para o construtor do Service
+        this.customerService = new CustomerService(userDAO);
+        this.authenticationService = new AuthenticationService(userDAO);
     }
+
+    // Método principal
+    public static void main(String[] args) {
+        App application = new App();
+
+        SwingUtilities.invokeLater(() -> {
+            // Injeta ambos os serviços no LoginFrame
+            new LoginFrame(application.authenticationService, application.customerService).setVisible(true);
+        });
+    }
+
+    // ...
 }

@@ -24,6 +24,10 @@ public class AuthenticationService {
     private Map<String, User> activeSessions;
 
     // Construtor para Injeção de Dependência
+    public AuthenticationService(IUserDAO userDAO) {
+        this.userDAO = userDAO;
+    }
+
     public AuthenticationService(IUserDAO userDAO, IAccountDAO accountDAO) {
         this.userDAO = userDAO;
         this.accountDAO = accountDAO;
@@ -87,4 +91,5 @@ public class AuthenticationService {
     public User getSessionUser(String sessionToken) {
         return activeSessions.get(sessionToken);
     }
+
 }
