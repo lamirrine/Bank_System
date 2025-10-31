@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.HashMap;
 import model.exceptions.DomainException;
+import model.exceptions.InvalidCredentialsException;
 import utils.security.PasswordUtil;
 import utils.security.PinUtil;
 
@@ -36,20 +37,26 @@ public class AuthenticationService {
      * @return O objeto User autenticado (Customer ou Employee).
      * @throws Exception Se o usuário não for encontrado ou a senha for inválida.
      */
-    public User login(String email, String password) throws Exception {
+// Dentro de src/main/java/model/services/AuthenticationService.java
+
+    public User login(String email, String password) throws InvalidCredentialsException, SQLException {
+        // 1. Buscar o usuário
         User user = userDAO.findByEmail(email);
 
         if (user == null) {
-            throw new DomainException("Utilizador não encontrado."); // Usando DomainException
+            throw new InvalidCredentialsException("Credenciais inválidas.");
         }
 
-        // A chamada de verificação de senha usa o novo utilitário
-        if (PasswordUtil.checkPassword(password, user.getPassHash())) {
-            // ... Lógica de sessão ...
-            return user;
-        } else {
-            throw new DomainException("Senha inválida."); // Usando DomainException
+        // 2. VERIFICAÇÃO DE SENHA CORRIGIDA
+        // Chamamos o novo método estático checkPassword
+        boolean isPasswordValid = PasswordUtil.checkPassword(password, user.getPassHash());
+
+        if (!isPasswordValid) {
+            // Agora esta linha será ativada se os hashes não corresponderem
+            throw new InvalidCredentialsException("Senha inválida.");
         }
+
+        return user;
     }
 
     /**

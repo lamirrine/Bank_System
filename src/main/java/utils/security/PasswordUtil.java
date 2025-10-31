@@ -31,11 +31,18 @@ public class PasswordUtil {
     /**
      * Verifica se uma senha corresponde a um hash.
      */
-    public static boolean checkPassword(String plainText, String storedHash) {
-        if (storedHash == null) {
+    // Dentro de src/main/java/utils/security/PasswordUtil.java
+
+// Adicione este método (ou ajuste o seu método de verificação):
+    public static boolean checkPassword(String plainPassword, String storedHash) {
+        if (plainPassword == null || storedHash == null) {
             return false;
         }
-        String hashedAttempt = hashPassword(plainText);
-        return hashedAttempt.equals(storedHash);
+
+        // 1. Gera o hash da senha fornecida (texto simples)
+        String inputHash = hashPassword(plainPassword); // Reusa o método de hash
+
+        // 2. Compara com o hash armazenado no banco de dados
+        return inputHash.equals(storedHash);
     }
 }
