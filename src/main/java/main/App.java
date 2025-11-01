@@ -1,29 +1,28 @@
+// main/App.java
 package main;
 
-import model.services.CustomerService;
-import model.services.AuthenticationService;
-import model.dao.IUserDAO;
-import model.dao.impl.UserDAO;
-import view.LoginFrame;
-
-import javax.swing.SwingUtilities;
+import controller.MainController;
+import javax.swing.*;
 
 public class App {
-
-    private final CustomerService customerService;
-    private final AuthenticationService authenticationService;
-
-    public App() {
-        IUserDAO userDAO = new UserDAO();
-        this.customerService = new CustomerService(userDAO);
-        this.authenticationService = new AuthenticationService(userDAO);
-    }
-
     public static void main(String[] args) {
-        App application = new App();
+        // Configuração do look and feel
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            System.out.println("Usando look and feel padrão");
+        }
 
+        // Inicia a aplicação
         SwingUtilities.invokeLater(() -> {
-            new LoginFrame(application.authenticationService, application.customerService).setVisible(true);
+            try {
+                new MainController().start();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null,
+                        "Erro ao iniciar aplicação: " + e.getMessage(),
+                        "Erro Fatal", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
         });
     }
 }

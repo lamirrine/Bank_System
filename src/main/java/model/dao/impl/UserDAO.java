@@ -2,8 +2,11 @@ package model.dao.impl;
 
 import config.DatabaseConnection;
 import model.dao.IUserDAO;
+import model.entities.Employee;
 import model.entities.User;
 import model.entities.Customer;
+import model.enums.UserType;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,7 +15,7 @@ import java.sql.Statement;
 
 public class UserDAO implements IUserDAO {
 
-    private static final String FIND_BY_EMAIL = "SELECT user_id, first_name, last_name, email, pass_hash, registration_date FROM user WHERE email = ?";
+    private static final String FIND_BY_EMAIL = "SELECT user_id, first_name, last_name, email, phone, address, pass_hash, user_type, registration_date FROM user WHERE email = ?";
 
     @Override
     public User findByEmail(String email) throws SQLException {
@@ -23,18 +26,26 @@ public class UserDAO implements IUserDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                // NOTA: Na prática, você precisaria de um método para determinar se é Customer ou Employee
-                // Aqui, assumimos temporariamente que é um Customer para fins de retorno
-                Customer user = new Customer();
+                String userTypeStr = rs.getString("user_type");
+                UserType userType = UserType.valueOf(userTypeStr);
+
+                User user;
+                if (userType == UserType.CUSTOMER) {
+                    user = new Customer();
+                } else {
+                    user = new Employee();
+                }
+
                 user.setUserId(rs.getInt("user_id"));
                 user.setFirstName(rs.getString("first_name"));
                 user.setLastName(rs.getString("last_name"));
                 user.setEmail(rs.getString("email"));
+                user.setPhone(rs.getString("phone"));
+                user.setAddress(rs.getString("address"));
                 user.setPassHash(rs.getString("pass_hash"));
+                user.setUserType(userType);
                 user.setRegistrationDate(rs.getTimestamp("registration_date"));
 
-                // O Service terá que fazer um downcast para Customer ou Employee,
-                // ou buscar dados adicionais via CustomerDAO/EmployeeDAO.
                 return user;
             }
             return null;
