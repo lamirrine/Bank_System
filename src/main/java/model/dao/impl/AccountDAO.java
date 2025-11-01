@@ -7,7 +7,7 @@ import model.enums.AccountStatus;
 import java.sql.*;
 import java.util.List;
 
-public class MySQLAccountDAO implements IAccountDAO {
+public class AccountDAO implements IAccountDAO {
 
     private static final String UPDATE_BALANCE = "UPDATE account SET balance = ? WHERE account_id = ?";
 

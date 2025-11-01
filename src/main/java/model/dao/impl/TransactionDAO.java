@@ -7,7 +7,7 @@ import java.sql.*;
 import java.util.Date;
 import java.util.List;
 
-public class MySQLTransactionDAO implements ITransactionDAO {
+public class TransactionDAO implements ITransactionDAO {
 
     private static final String SAVE_TRANSACTION =
             "INSERT INTO transaction (type, amount, timestamp, status, description, source_account_id, destination_account_id, resulting_balance, fee_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";

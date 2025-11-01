@@ -1,5 +1,7 @@
 package model.entities;
 
+import model.enums.UserType;
+
 // A classe Customer estende User, adicionando campos específicos de cliente.
 public class Customer extends User {
 
@@ -11,14 +13,13 @@ public class Customer extends User {
     // Construtor Padrão
     public Customer() {
         super();
-        this.setUserType("CUSTOMER");
+        this.setUserType(UserType.valueOf("CUSTOMER"));
     }
 
     // Construtor Completo (para Registo)
-    // O address é recebido aqui e passado para a superclasse
     public Customer(String firstName, String lastName, String email, String phone, String passHash, String address, String biNumber, String nuit, String passportNumber) {
         // CORREÇÃO: Passa 'address' e 'userType' para o construtor da superclasse
-        super(firstName, lastName, email, phone, passHash, address, "CUSTOMER");
+        super(firstName, lastName, email, phone, passHash, address, UserType.valueOf("CUSTOMER"));
 
         this.biNumber = biNumber;
         this.nuit = nuit;
@@ -28,7 +29,7 @@ public class Customer extends User {
     // Construtor Usado para Carregamento (inclui userId)
     public Customer(int userId, String firstName, String lastName, String email, String phone, String passHash, String address, String biNumber, String nuit, String passportNumber) {
         // CORREÇÃO: Passa 'address' e 'userType' para o construtor da superclasse
-        super(userId, firstName, lastName, email, phone, passHash, address, "CUSTOMER");
+        super(userId, firstName, lastName, email, phone, passHash, address, UserType.valueOf("CUSTOMER"));
 
         this.biNumber = biNumber;
         this.nuit = nuit;

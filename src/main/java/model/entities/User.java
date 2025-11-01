@@ -1,5 +1,7 @@
 package model.entities;
 
+import model.enums.UserType;
+
 import java.util.Date;
 
 public class User {
@@ -12,11 +14,11 @@ public class User {
     protected String phone;
     protected String passHash;
     protected String address;       // <-- CORREÇÃO: ENDEREÇO ESTÁ AQUI
-    protected String userType;      // <-- userType ADICIONADO PARA O LOGIN
+    protected UserType userType;      // <-- userType ADICIONADO PARA O LOGIN
     protected Date registrationDate;
 
     // Construtor completo (para carregamento do DB)
-    public User(int userId, String firstName, String lastName, String email, String phone, String passHash, String address, String userType) {
+    public User(int userId, String firstName, String lastName, String email, String phone, String passHash, String address, UserType userType) {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -29,7 +31,7 @@ public class User {
     }
 
     // Construtor usado no Registo (ID é gerado no DB)
-    public User(String firstName, String lastName, String email, String phone, String passHash, String address, String userType) {
+    public User(String firstName, String lastName, String email, String phone, String passHash, String address, UserType userType) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -53,11 +55,11 @@ public class User {
         this.address = address;
     }
 
-    public String getUserType() {
+    public UserType getUserType() {
         return userType;
     }
 
-    public void setUserType(String userType) {
+    public void setUserType(UserType userType) {
         this.userType = userType;
     }
 

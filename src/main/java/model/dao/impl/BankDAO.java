@@ -5,7 +5,7 @@ import model.dao.IBankDAO;
 import model.entities.Bank;
 import java.sql.*;
 
-public class MySQLBankDAO implements IBankDAO {
+public class BankDAO implements IBankDAO {
 
     private static final String GET_BANK_INFO = "SELECT bank_code, bank_name, transfer_fee_rate, support_phone, emergency_phone FROM bank LIMIT 1";
 

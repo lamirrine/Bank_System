@@ -3,7 +3,7 @@ package main;
 import model.services.CustomerService;
 import model.services.AuthenticationService;
 import model.dao.IUserDAO;
-import model.dao.impl.MySQLUserDAO;
+import model.dao.impl.UserDAO;
 import view.LoginFrame;
 
 import javax.swing.SwingUtilities;
@@ -14,7 +14,7 @@ public class App {
     private final AuthenticationService authenticationService;
 
     public App() {
-        IUserDAO userDAO = new MySQLUserDAO();
+        IUserDAO userDAO = new UserDAO();
         this.customerService = new CustomerService(userDAO);
         this.authenticationService = new AuthenticationService(userDAO);
     }

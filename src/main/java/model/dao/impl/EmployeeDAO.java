@@ -7,13 +7,14 @@ import model.enums.AccessLevel;
 import java.sql.*;
 import java.util.List;
 
-public class MySQLEmployeeDAO implements IEmployeeDAO {
+public class EmployeeDAO implements IEmployeeDAO {
 
-    private static final String SAVE_EMPLOYEE =
-            "INSERT INTO employee (employee_id, access_level, is_supervisor) VALUES (?, ?, ?)";
+
 
     @Override
     public void save(Employee employee) throws SQLException {
+         String SAVE_EMPLOYEE = "INSERT INTO employee (employee_id, access_level, is_supervisor) VALUES (?, ?, ?)";
+
         // Assume que employee.getUserId() já foi preenchido pelo MySQLUserDAO.save()
         if (employee.getUserId() == 0) {
             throw new SQLException("ID do usuário base não definido. Não é possível salvar o Employee.");

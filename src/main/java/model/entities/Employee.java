@@ -1,6 +1,8 @@
 package model.entities;
 
 import model.enums.AccessLevel; // IMPORTAR O ENUM AQUI!
+import model.enums.UserType;
+
 import java.util.Date;
 
 // A classe Employee estende User
@@ -13,14 +15,14 @@ public class Employee extends User {
     // Construtor Padrão
     public Employee() {
         super();
-        this.setUserType("EMPLOYEE");
+        this.setUserType(UserType.valueOf("EMPLOYEE"));
     }
 
     // Construtor para Registo
     public Employee(String firstName, String lastName, String email, String phone, String passHash, String address,
                     String employeeId, AccessLevel accessLevel, boolean isSupervisor) { // <-- AccessLevel no argumento
 
-        super(firstName, lastName, email, phone, passHash, address, "EMPLOYEE");
+        super(firstName, lastName, email, phone, passHash, address, UserType.valueOf("EMPLOYEE"));
 
         this.employeeId = employeeId;
         this.accessLevel = accessLevel;
@@ -31,7 +33,7 @@ public class Employee extends User {
     public Employee(int userId, String firstName, String lastName, String email, String phone, String passHash, String address,
                     String employeeId, AccessLevel accessLevel, boolean isSupervisor) { // <-- AccessLevel no argumento
 
-        super(userId, firstName, lastName, email, phone, passHash, address, "EMPLOYEE");
+        super(userId, firstName, lastName, email, phone, passHash, address, UserType.valueOf("EMPLOYEE"));
 
         this.employeeId = employeeId;
         this.accessLevel = accessLevel;
@@ -47,7 +49,6 @@ public class Employee extends User {
         this.employeeId = employeeId;
     }
 
-    // --- CORREÇÃO: Getter e Setter para AccessLevel (agora é do tipo Enum) ---
     public AccessLevel getAccessLevel() {
         return accessLevel;
     }
@@ -55,7 +56,6 @@ public class Employee extends User {
     public void setAccessLevel(AccessLevel accessLevel) { // O setter recebe o Enum
         this.accessLevel = accessLevel;
     }
-    // -------------------------------------------------------------------------
 
     public boolean isSupervisor() {
         return isSupervisor;

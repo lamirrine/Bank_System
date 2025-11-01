@@ -3,17 +3,14 @@ package model.dao.impl;
 import config.DatabaseConnection;
 import model.dao.IUserDAO;
 import model.entities.User;
-import model.entities.Customer; // Necessário para instanciar, pois User é abstrato
-import java.sql.*;
-import java.util.Date;
+import model.entities.Customer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 
-public class MySQLUserDAO implements IUserDAO {
+public class UserDAO implements IUserDAO {
 
     private static final String FIND_BY_EMAIL = "SELECT user_id, first_name, last_name, email, pass_hash, registration_date FROM user WHERE email = ?";
 

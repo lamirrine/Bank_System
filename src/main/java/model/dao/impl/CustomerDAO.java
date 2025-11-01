@@ -5,12 +5,7 @@ import model.dao.ICustomerDAO;
 import model.entities.Customer;
 import java.sql.*;
 
-public class MySQLCustomerDAO implements ICustomerDAO {
-
-    // Query para INSERT, pressupondo que user_id já foi gerado por MySQLUserDAO
-    private static final String SAVE_CUSTOMER =
-            "INSERT INTO customer (customer_id, bi_number, nuit, passport_number) VALUES (?, ?, ?, ?)";
-
+public class CustomerDAO implements ICustomerDAO {
 
 
     @Override
@@ -19,7 +14,6 @@ public class MySQLCustomerDAO implements ICustomerDAO {
             throw new SQLException("ID do usuário base não definido.");
         }
 
-        // CORRIGIDO: Salva os campos que realmente existem na tabela 'customer'
         String sql = "INSERT INTO customer (customer_id, bi_number, nuit, passport_number) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();

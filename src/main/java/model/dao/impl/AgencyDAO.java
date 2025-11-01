@@ -7,7 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MySQLAgencyDAO implements IAgencyDAO {
+public class AgencyDAO implements IAgencyDAO {
 
     private static final String FIND_ALL = "SELECT * FROM agency";
 

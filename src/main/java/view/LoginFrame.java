@@ -1,6 +1,7 @@
 package view;
 
 import model.entities.User;
+import model.enums.UserType;
 import model.exceptions.InvalidCredentialsException;
 import model.services.AuthenticationService;
 import model.services.CustomerService;
@@ -147,12 +148,12 @@ public class LoginFrame extends JFrame {
 
             try {
                 User user = authService.login(email, password);
-                String userType = user.getUserType(); // DB retorna CUSTOMER ou EMPLOYEE
+                UserType userType = user.getUserType(); // DB retorna CUSTOMER ou EMPLOYEE
 
                 // Lógica de Autorização (Correção do erro de mapeamento - Image 2)
                 String expectedType = selectedRole.equals("CLIENTE") ? "CUSTOMER" : "EMPLOYEE";
 
-                if (!expectedType.equalsIgnoreCase(userType)) {
+                if (!expectedType.equalsIgnoreCase(String.valueOf(userType))) {
                     JOptionPane.showMessageDialog(LoginFrame.this,
                             "A autenticação foi bem-sucedida, mas o seu perfil de '" + userType + "' não corresponde ao acesso escolhido ('" + selectedRole + "').",
                             "Erro de Autorização: Perfil Incorreto",
