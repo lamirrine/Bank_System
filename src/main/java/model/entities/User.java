@@ -42,6 +42,20 @@ public class User {
         this.registrationDate = new Date();
     }
 
+    //login
+
+
+    public User(int userId, String email, String passHash) {
+        this.userId = userId;
+        this.email = email;
+        this.passHash = passHash;
+    }
+
+    public User(String email, String passHash) {
+        this.email = email;
+        this.passHash = passHash;
+    }
+
     public User() {
     }
 

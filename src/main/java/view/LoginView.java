@@ -1,4 +1,3 @@
-// view/LoginView.java
 package view;
 
 import javax.swing.*;
@@ -19,9 +18,9 @@ public class LoginView extends JFrame {
     private void initializeUI(String userType) {
         setTitle("Banco Digital - Login " + userType);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 600);
+        setSize(500, 600);
         setLocationRelativeTo(null);
-        setResizable(false);
+        //setResizable(false);
         getContentPane().setBackground(Color.WHITE);
 
         // Layout principal

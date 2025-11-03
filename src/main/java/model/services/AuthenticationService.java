@@ -34,15 +34,6 @@ public class AuthenticationService {
         this.activeSessions = new HashMap<>();
     }
 
-    /**
-     * Tenta autenticar um usuário usando email e senha.
-     * @param email Email do usuário.
-     * @param password Senha em texto claro.
-     * @return O objeto User autenticado (Customer ou Employee).
-     * @throws Exception Se o usuário não for encontrado ou a senha for inválida.
-     */
-// Dentro de src/main/java/model/services/AuthenticationService.java
-
     public User login(String email, String password) throws InvalidCredentialsException, SQLException {
         // 1. Buscar o usuário
         User user = userDAO.findByEmail(email);
@@ -51,15 +42,11 @@ public class AuthenticationService {
             throw new InvalidCredentialsException("Credenciais inválidas.");
         }
 
-        // 2. VERIFICAÇÃO DE SENHA CORRIGIDA
-        // Chamamos o novo método estático checkPassword
         boolean isPasswordValid = PasswordUtil.checkPassword(password, user.getPassHash());
 
         if (!isPasswordValid) {
-            // Agora esta linha será ativada se os hashes não corresponderem
             throw new InvalidCredentialsException("Senha inválida.");
         }
-
         return user;
     }
 
