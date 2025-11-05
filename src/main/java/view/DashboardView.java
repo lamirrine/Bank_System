@@ -1,4 +1,3 @@
-// view/DashboardView.java
 package view;
 
 import javax.swing.*;
@@ -17,9 +16,9 @@ public class DashboardView extends JFrame {
     private void initializeUI() {
         setTitle("Banco Digital - Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1400, 900);
+        setSize(1800, 1000);
         setLocationRelativeTo(null);
-        setResizable(false);
+        //setResizable(false);
         getContentPane().setBackground(new Color(241, 245, 249));
 
         // Layout principal

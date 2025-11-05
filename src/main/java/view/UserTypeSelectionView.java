@@ -17,7 +17,7 @@ public class UserTypeSelectionView extends JFrame {
     private void initializeUI() {
         setTitle("Banco Digital - Entrar");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(500, 600);
+        setSize(900, 600);
         setLocationRelativeTo(null);
         setResizable(false);
         setUndecorated(true);

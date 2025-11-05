@@ -35,7 +35,7 @@ public class PanelCover extends JPanel {
     }
 
     private void init() {
-        title = new JLabel("Welcome Back!");
+        title = new JLabel("Bem vindo de volta!");
         title.setFont(new Font("sansserif", 1, 30));
         title.setForeground(new Color(245, 245, 245));
         add(title);
@@ -76,8 +76,8 @@ public class PanelCover extends JPanel {
 
     @Override
     protected void paintComponent(Graphics grphcs) {
-        Graphics2D g2 = (Graphics2D) grphcs;
-        GradientPaint gra = new GradientPaint(0, 0, new Color(35, 166, 97), 0, getHeight(), new Color(22, 116, 66));
+        Graphics2D g2 = (Graphics2D) grphcs;        //Color(35, 166, 97)   //22 , 116, 66
+        GradientPaint gra = new GradientPaint(0, 0, new Color(30, 40, 122), 0, getHeight(), new Color(30, 61, 100));
         g2.setPaint(gra);
         g2.fillRect(0, 0, getWidth(), getHeight());
         super.paintComponent(grphcs);
@@ -135,7 +135,4 @@ public class PanelCover extends JPanel {
             this.isLogin = login;
         }
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    // End of variables declaration//GEN-END:variables
 }

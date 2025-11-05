@@ -1,18 +1,16 @@
-// controller/AuthenticationController.java (COM DEBUG)
 package controller;
 
 import model.entities.Customer;
 import model.entities.User;
 import model.services.AuthenticationService;
-import view.LoginView;
+import view.login.componet.Loginview;
 import view.UserTypeSelectionView;
 import view.DashboardView;
 import javax.swing.*;
-import java.sql.SQLException;
 
 public class AuthenticationController {
     private UserTypeSelectionView typeSelectionView;
-    private LoginView loginView;
+    private Loginview loginview;
     private AuthenticationService authService;
 
     public AuthenticationController(AuthenticationService authService) {
@@ -23,14 +21,13 @@ public class AuthenticationController {
 
     private void initializeViews() {
         typeSelectionView = new UserTypeSelectionView();
-        loginView = new LoginView("CLIENTE");
+        loginview = new Loginview();
     }
 
     private void setupControllers() {
         typeSelectionView.addClientListener(e -> showClientLogin());
         typeSelectionView.addEmployeeListener(e -> showEmployeeLogin());
-        loginView.addBackListener(e -> showTypeSelection());
-        loginView.addLoginListener(e -> handleLogin());
+        loginview.addLoginListener(e -> handleLogin());
     }
 
     public void start() {
@@ -38,13 +35,15 @@ public class AuthenticationController {
     }
 
     private void showTypeSelection() {
-        loginView.setVisible(false);
+        loginview.setVisible(false);
+
         typeSelectionView.setVisible(true);
     }
 
     private void showClientLogin() {
         typeSelectionView.setVisible(false);
-        loginView.setVisible(true);
+        loginview.setVisible(true);
+        //loginView.setVisible(true);
     }
 
     private void showEmployeeLogin() {
@@ -54,14 +53,14 @@ public class AuthenticationController {
                 "Em Desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void handleLogin() {
-        String email = loginView.getEmail();
-        String password = loginView.getPassword();
+    public void handleLogin() {
+        String email = loginview.getEmail();
+        String password = loginview.getPassword();
 
         System.out.println("Tentando login com email: " + email); // DEBUG
 
         if (email.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(loginView,
+            JOptionPane.showMessageDialog(loginview,
                     "Por favor, preencha todos os campos!",
                     "Campos Vazios", JOptionPane.WARNING_MESSAGE);
             return;
@@ -80,12 +79,12 @@ public class AuthenticationController {
             if (user != null && user instanceof Customer) {
                 // Login bem-sucedido
                 System.out.println("Login bem-sucedido para: " + user.getEmail()); // DEBUG
-                loginView.setVisible(false);
+                loginview.setVisible(false);
                 openCustomerDashboard((Customer) user);
 
             } else {
                 System.out.println("Falha no login - usuário não é Customer ou é null"); // DEBUG
-                JOptionPane.showMessageDialog(loginView,
+                JOptionPane.showMessageDialog(loginview,
                         "Credenciais inválidas ou usuário não é cliente!",
                         "Login Falhou", JOptionPane.ERROR_MESSAGE);
             }
@@ -93,7 +92,7 @@ public class AuthenticationController {
         } catch (Exception e) {
             System.out.println("Erro durante login: " + e.getMessage()); // DEBUG
             e.printStackTrace(); // DEBUG
-            JOptionPane.showMessageDialog(loginView,
+            JOptionPane.showMessageDialog(loginview,
                     "Erro ao fazer login: " + e.getMessage(),
                     "Erro", JOptionPane.ERROR_MESSAGE);
         }
