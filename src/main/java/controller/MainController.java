@@ -1,5 +1,4 @@
-// controller/MainController.java (ATUALIZADO)
-package controller;
+package  controller;
 
 import model.dao.impl.*;
 import model.services.AuthenticationService;

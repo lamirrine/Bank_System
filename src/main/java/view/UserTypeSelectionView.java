@@ -17,11 +17,11 @@ public class UserTypeSelectionView extends JFrame {
     private void initializeUI() {
         setTitle("Banco Digital - Entrar");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(900, 600);
+        setSize(900, 560);
         setLocationRelativeTo(null);
         setResizable(false);
         setUndecorated(true);
-        setShape(new RoundRectangle2D.Double(0, 0, 500, 600, 40, 40));
+        setShape(new RoundRectangle2D.Double(0, 0, 900, 560, 40, 40));
 
         getContentPane().setBackground(new Color(13, 36, 56));
 
@@ -71,7 +71,7 @@ public class UserTypeSelectionView extends JFrame {
     }
 
     private JPanel createSelectionPanel() {
-        JPanel panel = new JPanel(new GridLayout(2, 1, 20, 20));
+        JPanel panel = new JPanel(new GridLayout(2, 1, 40, 40));
         panel.setBackground(new Color(13, 36, 56));
 
         // Client Card
