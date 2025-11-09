@@ -24,18 +24,18 @@ public class DashboardController {
         this.statementService = statementService;
         this.currentCustomer = customer;
 
-        initializeController();
+       // initializeController();
         loadDashboardData();
     }
 
-    private void initializeController() {
+   /* private void initializeController() {
         // Configurar listeners dos botões
         view.getDepositBtn().addActionListener(e -> openDeposit());
         view.getWithdrawBtn().addActionListener(e -> openWithdraw());
         view.getTransferBtn().addActionListener(e -> openTransfer());
         view.getStatementBtn().addActionListener(e -> openStatement());
         view.getLogoutBtn().addActionListener(e -> logout());
-    }
+    }*/
 
     private void loadDashboardData() {
         try {
@@ -57,12 +57,12 @@ public class DashboardController {
 
         // Por enquanto, vamos usar dados mock
         currentAccount = new Account();
-        currentAccount.setAccountNumber("12345-X");
-        currentAccount.setBalance(12345.67);
-        currentAccount.setDailyWithdrawLimit(3250.00);
-        currentAccount.setDailyTransferLimit(10000.00);
+        //currentAccount.setAccountNumber("12345-X");
+       // currentAccount.setBalance(12345.67);
+        //currentAccount.setDailyWithdrawLimit(3250.00);
+        //currentAccount.setDailyTransferLimit(10000.00);
 
-        view.setBalance(currentAccount.getBalance());
+       //view.setBalance(currentAccount.getBalance());
     }
 
     private void loadRecentTransactions() {
@@ -80,7 +80,7 @@ public class DashboardController {
 
     private void updateBalanceDisplay() {
         if (currentAccount != null) {
-            view.setBalance(currentAccount.getBalance());
+            //view.setBalance(currentAccount.getBalance());
         }
     }
 

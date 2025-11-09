@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+import java.util.Objects;
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.animation.timing.Animator;
@@ -119,13 +120,13 @@ public class Loginview extends JFrame {
 
         // Campo Email
         emailField = new MyTextField();
-        emailField.setPrefixIcon(new ImageIcon("/main/java/view/icon/mail.png"));
+        //emailField.setPrefixIcon(new ImageIcon( getClass().getResource("/main/java/view/icon/mail.png")));
         emailField.setHint("Email");
         login.add(emailField, "w 60%");
 
         //pass
         passwordField = new MyPasswordField();
-        passwordField.setPrefixIcon(new ImageIcon(("/main/java/view/icon/pass.png")));
+        passwordField.setPrefixIcon(new ImageIcon("/main/java/view/icon/pass.png"));
         passwordField.setHint("Password");
         login.add(passwordField, "w 60%");
 

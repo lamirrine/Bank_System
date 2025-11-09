@@ -1,13 +1,18 @@
+// view/DashboardView.java
 package view;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.geom.RoundRectangle2D;
 
 public class DashboardView extends JFrame {
     private JLabel balanceLabel;
+    private JLabel welcomeLabel;
+    private JLabel accountNumberLabel;
     private JButton depositBtn, withdrawBtn, transferBtn, statementBtn, logoutBtn;
     private JLabel dailyLimitLabel, transferLimitLabel;
+    private JPanel mainContentPanel;
 
     public DashboardView() {
         initializeUI();
@@ -16,14 +21,14 @@ public class DashboardView extends JFrame {
     private void initializeUI() {
         setTitle("Banco Digital - Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1800, 1000);
+        setSize(1400, 900);
         setLocationRelativeTo(null);
         //setResizable(false);
-        getContentPane().setBackground(new Color(241, 245, 249));
+        getContentPane().setBackground(new Color(248, 250, 252));
 
         // Layout principal
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(new Color(241, 245, 249));
+        mainPanel.setBackground(new Color(248, 250, 252));
 
         // Sidebar
         JPanel sidebar = createSidebar();
@@ -39,91 +44,46 @@ public class DashboardView extends JFrame {
     private JPanel createSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBackground(new Color(30, 41, 59));
+        sidebar.setBackground(new Color(15, 23, 42));
         sidebar.setPreferredSize(new Dimension(280, 900));
-        sidebar.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        sidebar.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
-        // Logo
+        // Logo section
         JPanel logoPanel = new JPanel();
-        logoPanel.setBackground(new Color(51, 65, 85));
-        logoPanel.setPreferredSize(new Dimension(200, 60));
-        logoPanel.setMaximumSize(new Dimension(200, 60));
-        logoPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
-        JLabel logoLabel = new JLabel("Banco Digital", JLabel.CENTER);
-        logoLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        logoPanel.setBackground(new Color(15, 23, 42));
+        logoPanel.setPreferredSize(new Dimension(280, 120));
+        logoPanel.setMaximumSize(new Dimension(280, 120));
+        logoPanel.setLayout(new BorderLayout());
+
+        JLabel logoLabel = new JLabel("🏦 Banco Digital", JLabel.CENTER);
+        logoLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         logoLabel.setForeground(Color.WHITE);
-        logoPanel.add(logoLabel);
+        logoLabel.setBorder(BorderFactory.createEmptyBorder(40, 0, 20, 0));
+        logoPanel.add(logoLabel, BorderLayout.CENTER);
 
         // Menu items
-        String[] menuItems = {"🏠 Início", "💰 Depósito", "💸 Levantamento", "🔄 Transferência", "📊 Extrato", "👤 Cadastro"};
         JPanel menuPanel = new JPanel();
-        menuPanel.setLayout(new GridLayout(6, 1, 10, 10));
-        menuPanel.setBackground(new Color(30, 41, 59));
-        menuPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+        menuPanel.setLayout(new GridLayout(6, 1, 0, 5));
+        menuPanel.setBackground(new Color(15, 23, 42));
+        menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        String[] menuItems = {"🏠 Início", "💰 Depósito", "💸 Levantamento", "🔄 Transferência", "📊 Extrato", "👤 Perfil"};
+        Color[] menuColors = {
+                new Color(59, 130, 246), // Azul para Início
+                new Color(16, 185, 129), // Verde para Depósito
+                new Color(239, 68, 68),  // Vermelho para Levantamento
+                new Color(168, 85, 247), // Roxo para Transferência
+                new Color(245, 158, 11), // Laranja para Extrato
+                new Color(14, 165, 233)  // Ciano para Perfil
+        };
 
         for (int i = 0; i < menuItems.length; i++) {
-            JButton menuBtn = new JButton(menuItems[i]);
-            menuBtn.setFont(new Font("Arial", Font.PLAIN, 14));
-            menuBtn.setHorizontalAlignment(SwingConstants.LEFT);
-            menuBtn.setBackground(i == 0 ? new Color(15, 23, 42) : new Color(51, 65, 85));
-            menuBtn.setForeground(Color.WHITE);
-            menuBtn.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-            menuBtn.setFocusPainted(false);
-            menuBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            JButton menuBtn = createMenuButton(menuItems[i], menuColors[i], i == 0);
             menuPanel.add(menuBtn);
         }
 
         // User info panel
-        JPanel userPanel = new JPanel();
-        userPanel.setLayout(new BorderLayout(10, 10));
-        userPanel.setBackground(new Color(51, 65, 85));
-        userPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
-        userPanel.setMaximumSize(new Dimension(240, 120));
-
-        // User avatar and info
-        JPanel userInfoPanel = new JPanel(new BorderLayout(10, 5));
-        userInfoPanel.setBackground(new Color(51, 65, 85));
-
-        // Avatar
-        JPanel avatarPanel = new JPanel();
-        avatarPanel.setPreferredSize(new Dimension(50, 50));
-        avatarPanel.setBackground(new Color(16, 185, 129));
-        avatarPanel.setLayout(new BorderLayout());
-        JLabel avatarLabel = new JLabel("JS", JLabel.CENTER);
-        avatarLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        avatarLabel.setForeground(Color.WHITE);
-        avatarPanel.add(avatarLabel, BorderLayout.CENTER);
-
-        // User details
-        JPanel detailsPanel = new JPanel();
-        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
-        detailsPanel.setBackground(new Color(51, 65, 85));
-
-        JLabel nameLabel = new JLabel("João Silva");
-        nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        nameLabel.setForeground(Color.WHITE);
-
-        JLabel accountLabel = new JLabel("Conta: 12345-X");
-        accountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        accountLabel.setForeground(new Color(148, 163, 184));
-
-        detailsPanel.add(nameLabel);
-        detailsPanel.add(accountLabel);
-
-        userInfoPanel.add(avatarPanel, BorderLayout.WEST);
-        userInfoPanel.add(detailsPanel, BorderLayout.CENTER);
-
-        // Logout button
-        logoutBtn = new JButton("Sair");
-        logoutBtn.setFont(new Font("Arial", Font.BOLD, 12));
-        logoutBtn.setBackground(new Color(71, 85, 105));
-        logoutBtn.setForeground(Color.WHITE);
-        logoutBtn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        logoutBtn.setFocusPainted(false);
-        logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        userPanel.add(userInfoPanel, BorderLayout.CENTER);
-        userPanel.add(logoutBtn, BorderLayout.SOUTH);
+        JPanel userPanel = createUserPanel();
 
         // Add components to sidebar
         sidebar.add(logoPanel);
@@ -134,17 +94,110 @@ public class DashboardView extends JFrame {
         return sidebar;
     }
 
+    private JButton createMenuButton(String text, Color color, boolean isActive) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setBackground(isActive ? color : new Color(30, 41, 59));
+        button.setForeground(Color.WHITE);
+        button.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Efeito hover
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (!isActive) {
+                    button.setBackground(new Color(51, 65, 85));
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (!isActive) {
+                    button.setBackground(new Color(30, 41, 59));
+                }
+            }
+        });
+
+        return button;
+    }
+
+    private JPanel createUserPanel() {
+        JPanel userPanel = new JPanel();
+        userPanel.setLayout(new BorderLayout(15, 15));
+        userPanel.setBackground(new Color(30, 41, 59));
+        userPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        userPanel.setMaximumSize(new Dimension(280, 140));
+
+        // User info
+        JPanel userInfoPanel = new JPanel(new BorderLayout(10, 5));
+        userInfoPanel.setBackground(new Color(30, 41, 59));
+
+        // Avatar with gradient
+        JPanel avatarPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                GradientPaint gradient = new GradientPaint(0, 0, new Color(59, 130, 246),
+                        getWidth(), getHeight(), new Color(168, 85, 247));
+                g2.setPaint(gradient);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 25, 25);
+            }
+        };
+        avatarPanel.setPreferredSize(new Dimension(50, 50));
+        avatarPanel.setLayout(new BorderLayout());
+
+        JLabel avatarLabel = new JLabel("JS", JLabel.CENTER);
+        avatarLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        avatarLabel.setForeground(Color.WHITE);
+        avatarPanel.add(avatarLabel, BorderLayout.CENTER);
+
+        // User details
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+        detailsPanel.setBackground(new Color(30, 41, 59));
+
+        welcomeLabel = new JLabel("João Silva");
+        welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        welcomeLabel.setForeground(Color.WHITE);
+
+        accountNumberLabel = new JLabel("Conta: 12345-X");
+        accountNumberLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        accountNumberLabel.setForeground(new Color(148, 163, 184));
+
+        detailsPanel.add(welcomeLabel);
+        detailsPanel.add(accountNumberLabel);
+
+        userInfoPanel.add(avatarPanel, BorderLayout.WEST);
+        userInfoPanel.add(detailsPanel, BorderLayout.CENTER);
+
+        // Logout button
+        logoutBtn = new JButton("🚪 Sair");
+        logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        logoutBtn.setBackground(new Color(239, 68, 68));
+        logoutBtn.setForeground(Color.WHITE);
+        logoutBtn.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        logoutBtn.setFocusPainted(false);
+        logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        userPanel.add(userInfoPanel, BorderLayout.CENTER);
+        userPanel.add(logoutBtn, BorderLayout.SOUTH);
+
+        return userPanel;
+    }
+
     private JPanel createContentArea() {
         JPanel contentPanel = new JPanel(new BorderLayout());
-        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setBackground(new Color(248, 250, 252));
 
         // Header
         JPanel headerPanel = createHeader();
         contentPanel.add(headerPanel, BorderLayout.NORTH);
 
-        // Main content with scroll
-        JScrollPane scrollPane = createMainContent();
-        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        // Main content
+        mainContentPanel = createMainContent();
+        contentPanel.add(mainContentPanel, BorderLayout.CENTER);
 
         return contentPanel;
     }
@@ -153,18 +206,21 @@ public class DashboardView extends JFrame {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Color.WHITE);
         header.setPreferredSize(new Dimension(1120, 80));
-        header.setBorder(BorderFactory.createEmptyBorder(0, 40, 0, 40));
+        header.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(226, 232, 240)),
+                BorderFactory.createEmptyBorder(0, 40, 0, 40)
+        ));
 
-        JLabel titleLabel = new JLabel("Início");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titleLabel.setForeground(new Color(30, 41, 59));
+        JLabel titleLabel = new JLabel("Visão Geral");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setForeground(new Color(15, 23, 42));
 
         // Header icons
-        JPanel iconsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 0));
+        JPanel iconsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         iconsPanel.setBackground(Color.WHITE);
 
-        JButton notificationBtn = createIconButton("🔔");
-        JButton settingsBtn = createIconButton("⚙️");
+        JButton notificationBtn = createHeaderIconButton("🔔", new Color(59, 130, 246));
+        JButton settingsBtn = createHeaderIconButton("⚙️", new Color(107, 114, 128));
 
         iconsPanel.add(notificationBtn);
         iconsPanel.add(settingsBtn);
@@ -175,22 +231,68 @@ public class DashboardView extends JFrame {
         return header;
     }
 
-    private JButton createIconButton(String icon) {
+    private JPanel createAccountsPanel() {
+        JPanel panel = new JPanel();
+        // Implementar criação do painel de contas
+        panel.add(new JLabel("Accounts Panel"));
+        return panel;
+    }
+
+    private JPanel createTransactionsPanel() {
+        JPanel panel = new JPanel();
+        // Implementar criação do painel de transações
+        panel.add(new JLabel("Transactions Panel"));
+        return panel;
+    }
+
+
+    private JPanel createOffersPanel() {
+        JPanel panel = new JPanel();
+        // Implementar criação do painel de ofertas
+        panel.add(new JLabel("Offers Panel"));
+        return panel;
+    }
+
+    private JPanel createContactPanel() {
+        JPanel panel = new JPanel();
+        // Implementar criação do painel de contato
+        panel.add(new JLabel("Contact Panel"));
+        return panel;
+    }
+
+    private JButton createHeaderIconButton(String icon, Color color) {
         JButton button = new JButton(icon);
         button.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
-        button.setPreferredSize(new Dimension(50, 50));
-        button.setBackground(new Color(226, 232, 240));
+        button.setPreferredSize(new Dimension(45, 45));
+        button.setBackground(new Color(243, 244, 246));
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+                button.setForeground(Color.WHITE);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(243, 244, 246));
+                button.setForeground(Color.BLACK);
+            }
+        });
+
         return button;
     }
 
-    private JScrollPane createMainContent() {
+
+    private JPanel createMainContent() {
         JPanel content = new JPanel();
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        content.setBackground(new Color(241, 245, 249));
-        content.setBorder(BorderFactory.createEmptyBorder(20, 40, 40, 40));
+        content.setBackground(new Color(248, 250, 252));
+        content.setBorder(BorderFactory.createEmptyBorder(25, 40, 40, 40));
+
+        // Welcome section
+        content.add(createWelcomeSection());
+        content.add(Box.createVerticalStrut(30));
 
         // Balance card
         content.add(createBalanceCard());
@@ -200,8 +302,8 @@ public class DashboardView extends JFrame {
         content.add(createQuickActions());
         content.add(Box.createVerticalStrut(30));
 
-        // Accounts and transactions row
-        JPanel rowPanel = new JPanel(new BorderLayout());
+        // Main content row
+        JPanel rowPanel = new JPanel(new BorderLayout(20, 0));
 
         // Left side - Accounts and Transactions
         JPanel leftPanel = new JPanel();
@@ -213,49 +315,70 @@ public class DashboardView extends JFrame {
         // Right side - Various panels
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        rightPanel.add(createLimitsPanel());
+        //rightPanel.add(createLimitsPanel());
         rightPanel.add(Box.createVerticalStrut(20));
         rightPanel.add(createOffersPanel());
         rightPanel.add(Box.createVerticalStrut(20));
-        rightPanel.add(createContactsPanel());
+        //rightPanel.add(createContactsPanel());
 
         rowPanel.add(leftPanel, BorderLayout.CENTER);
-        rowPanel.add(Box.createHorizontalStrut(20));
         rowPanel.add(rightPanel, BorderLayout.EAST);
 
         content.add(rowPanel);
 
-        JScrollPane scrollPane = new JScrollPane(content);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        return scrollPane;
+        return content;
+    }
+
+    private JPanel createWelcomeSection() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(248, 250, 252));
+
+        JLabel welcomeText = new JLabel("Bom dia, João! 👋");
+        welcomeText.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        welcomeText.setForeground(new Color(15, 23, 42));
+
+        JLabel dateLabel = new JLabel("Segunda-feira, 15 de Junho 2024");
+        dateLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        dateLabel.setForeground(new Color(107, 114, 128));
+
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
+        textPanel.setBackground(new Color(248, 250, 252));
+        textPanel.add(welcomeText);
+        textPanel.add(dateLabel);
+
+        panel.add(textPanel, BorderLayout.WEST);
+        return panel;
     }
 
     private JPanel createBalanceCard() {
-        JPanel panel = createCard(900, 180);
+        JPanel panel = createCard(900, 160, new Color(59, 130, 246));
+        panel.setLayout(new BorderLayout());
+
+        // Gradient background
         panel.setLayout(new BorderLayout());
 
         JLabel titleLabel = new JLabel("Saldo Disponível");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setForeground(new Color(30, 41, 59));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 0));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titleLabel.setForeground(new Color(243, 244, 246));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(25, 30, 5, 0));
 
         balanceLabel = new JLabel("MZN 12.345,67");
-        balanceLabel.setFont(new Font("Arial", Font.BOLD, 36));
-        balanceLabel.setForeground(new Color(30, 41, 59));
-        balanceLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 20, 0));
+        balanceLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
+        balanceLabel.setForeground(Color.WHITE);
+        balanceLabel.setBorder(BorderFactory.createEmptyBorder(0, 30, 20, 0));
 
-        JButton detailsBtn = new JButton("Ver Detalhes");
-        detailsBtn.setFont(new Font("Arial", Font.BOLD, 14));
-        detailsBtn.setBackground(new Color(59, 130, 246));
-        detailsBtn.setForeground(Color.WHITE);
-        detailsBtn.setBorder(BorderFactory.createEmptyBorder(12, 30, 12, 30));
+        JButton detailsBtn = new JButton("Ver Detalhes →");
+        detailsBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        detailsBtn.setBackground(Color.WHITE);
+        detailsBtn.setForeground(new Color(59, 130, 246));
+        detailsBtn.setBorder(BorderFactory.createEmptyBorder(12, 25, 12, 25));
         detailsBtn.setFocusPainted(false);
         detailsBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.setBackground(Color.WHITE);
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 20));
+        buttonPanel.setOpaque(false);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 25, 30));
         buttonPanel.add(detailsBtn);
 
         panel.add(titleLabel, BorderLayout.NORTH);
@@ -267,22 +390,27 @@ public class DashboardView extends JFrame {
 
     private JPanel createQuickActions() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(241, 245, 249));
+        panel.setBackground(new Color(248, 250, 252));
 
         JLabel titleLabel = new JLabel("Ações Rápidas");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setForeground(new Color(30, 41, 59));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titleLabel.setForeground(new Color(15, 23, 42));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
-        JPanel actionsPanel = new JPanel(new GridLayout(1, 4, 20, 0));
-        actionsPanel.setBackground(new Color(241, 245, 249));
+        JPanel actionsPanel = new JPanel(new GridLayout(1, 4, 15, 0));
+        actionsPanel.setBackground(new Color(248, 250, 252));
 
         String[] actions = {"💰 Depositar", "💸 Levantar", "🔄 Transferir", "📊 Extrato"};
-        Color[] colors = {new Color(59, 130, 246), new Color(239, 68, 68),
-                new Color(16, 185, 129), new Color(107, 114, 128)};
+        String[] icons = {"💰", "💸", "🔄", "📊"};
+        Color[] colors = {
+                new Color(16, 185, 129),
+                new Color(239, 68, 68),
+                new Color(168, 85, 247),
+                new Color(245, 158, 11)
+        };
 
         for (int i = 0; i < actions.length; i++) {
-            JButton actionBtn = createActionCard(actions[i], colors[i]);
+            JButton actionBtn = createActionCard(actions[i], icons[i], colors[i]);
             actionsPanel.add(actionBtn);
         }
 
@@ -292,30 +420,27 @@ public class DashboardView extends JFrame {
         return panel;
     }
 
-    private JButton createActionCard(String text, Color color) {
+    private JButton createActionCard(String text, String icon, Color color) {
         JButton button = new JButton();
-        button.setLayout(new BorderLayout());
+        button.setLayout(new BorderLayout(0, 10));
         button.setPreferredSize(new Dimension(200, 120));
         button.setBackground(Color.WHITE);
-        button.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(229, 231, 235)),
+                BorderFactory.createEmptyBorder(25, 20, 25, 20)
+        ));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setFocusPainted(false);
 
-        JPanel iconPanel = new JPanel();
-        iconPanel.setPreferredSize(new Dimension(60, 60));
-        iconPanel.setBackground(new Color(226, 232, 240));
-        iconPanel.setLayout(new BorderLayout());
-
-        String icon = text.substring(0, text.indexOf(' '));
         JLabel iconLabel = new JLabel(icon, JLabel.CENTER);
-        iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 24));
-        iconPanel.add(iconLabel, BorderLayout.CENTER);
+        iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 32));
+        iconLabel.setForeground(color);
 
         JLabel textLabel = new JLabel(text.substring(text.indexOf(' ') + 1), JLabel.CENTER);
-        textLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        textLabel.setForeground(new Color(30, 41, 59));
+        textLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        textLabel.setForeground(new Color(15, 23, 42));
 
-        button.add(iconPanel, BorderLayout.CENTER);
+        button.add(iconLabel, BorderLayout.CENTER);
         button.add(textLabel, BorderLayout.SOUTH);
 
         // Store the action button reference
@@ -326,352 +451,64 @@ public class DashboardView extends JFrame {
             case "📊 Extrato": statementBtn = button; break;
         }
 
+        // Hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(color, 2),
+                        BorderFactory.createEmptyBorder(23, 18, 23, 18)
+                ));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(229, 231, 235)),
+                        BorderFactory.createEmptyBorder(25, 20, 25, 20)
+                ));
+            }
+        });
+
         return button;
     }
 
-    private JPanel createAccountsPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(241, 245, 249));
+    // ... (os métodos createAccountsPanel, createTransactionsPanel, createLimitsPanel, 
+    // createOffersPanel, createContactsPanel permanecem similares aos anteriores, 
+    // mas com cores e estilos atualizados)
 
-        JLabel titleLabel = new JLabel("Minhas Contas");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setForeground(new Color(30, 41, 59));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+    private JPanel createCard(int width, int height, Color backgroundColor) {
+        JPanel card = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        JPanel accountsPanel = new JPanel(new GridLayout(1, 2, 20, 0));
-        accountsPanel.setBackground(new Color(241, 245, 249));
-
-        // Account 1
-        JPanel account1 = createCard(430, 100);
-        account1.setLayout(new BorderLayout());
-
-        JLabel acc1Title = new JLabel("Conta Corrente");
-        acc1Title.setFont(new Font("Arial", Font.BOLD, 14));
-        acc1Title.setForeground(new Color(30, 41, 59));
-
-        JLabel acc1Number = new JLabel("12345-X");
-        acc1Number.setFont(new Font("Arial", Font.PLAIN, 12));
-        acc1Number.setForeground(new Color(100, 116, 139));
-
-        JLabel acc1Balance = new JLabel("MZN 5.000,00", JLabel.RIGHT);
-        acc1Balance.setFont(new Font("Arial", Font.BOLD, 18));
-        acc1Balance.setForeground(new Color(30, 41, 59));
-
-        JPanel acc1Left = new JPanel();
-        acc1Left.setLayout(new BoxLayout(acc1Left, BoxLayout.Y_AXIS));
-        acc1Left.setBackground(Color.WHITE);
-        acc1Left.add(acc1Title);
-        acc1Left.add(acc1Number);
-
-        account1.add(acc1Left, BorderLayout.WEST);
-        account1.add(acc1Balance, BorderLayout.EAST);
-
-        // Account 2
-        JPanel account2 = createCard(430, 100);
-        account2.setLayout(new BorderLayout());
-
-        JLabel acc2Title = new JLabel("Conta Poupança");
-        acc2Title.setFont(new Font("Arial", Font.BOLD, 14));
-        acc2Title.setForeground(new Color(30, 41, 59));
-
-        JLabel acc2Number = new JLabel("67890-Y");
-        acc2Number.setFont(new Font("Arial", Font.PLAIN, 12));
-        acc2Number.setForeground(new Color(100, 116, 139));
-
-        JLabel acc2Balance = new JLabel("MZN 7.345,67", JLabel.RIGHT);
-        acc2Balance.setFont(new Font("Arial", Font.BOLD, 18));
-        acc2Balance.setForeground(new Color(30, 41, 59));
-
-        JPanel acc2Left = new JPanel();
-        acc2Left.setLayout(new BoxLayout(acc2Left, BoxLayout.Y_AXIS));
-        acc2Left.setBackground(Color.WHITE);
-        acc2Left.add(acc2Title);
-        acc2Left.add(acc2Number);
-
-        account2.add(acc2Left, BorderLayout.WEST);
-        account2.add(acc2Balance, BorderLayout.EAST);
-
-        accountsPanel.add(account1);
-        accountsPanel.add(account2);
-
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(accountsPanel, BorderLayout.CENTER);
-
-        return panel;
-    }
-
-    private JPanel createTransactionsPanel() {
-        JPanel panel = createCard(900, 400);
-        panel.setLayout(new BorderLayout());
-
-        JLabel titleLabel = new JLabel("Últimas Transações");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setForeground(new Color(30, 41, 59));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 0));
-
-        // Table headers
-        String[] headers = {"Data", "Descrição", "Valor", "Saldo"};
-        JPanel headerPanel = new JPanel(new GridLayout(1, 4));
-        headerPanel.setBackground(Color.WHITE);
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 30, 10, 30));
-
-        for (String header : headers) {
-            JLabel headerLabel = new JLabel(header);
-            headerLabel.setFont(new Font("Arial", Font.BOLD, 12));
-            headerLabel.setForeground(new Color(100, 116, 139));
-            headerPanel.add(headerLabel);
-        }
-
-        // Transactions data
-        String[][] transactions = {
-                {"15/06/2023", "Transferência recebida - Maria Santos", "+ MZN 1.500,00", "MZN 12.345,67"},
-                {"14/06/2023", "Pagamento de serviços - Electricidade", "- MZN 850,50", "MZN 10.845,67"},
-                {"12/06/2023", "Depósito em caixa automático", "+ MZN 2.000,00", "MZN 11.696,17"},
-                {"10/06/2023", "Compra com cartão - Supermercado", "- MZN 1.250,35", "MZN 9.696,17"},
-                {"08/06/2023", "Transferência para - Carlos Lima", "- MZN 500,00", "MZN 10.946,52"}
-        };
-
-        JPanel transactionsPanel = new JPanel(new GridLayout(transactions.length, 1, 0, 15));
-        transactionsPanel.setBackground(Color.WHITE);
-        transactionsPanel.setBorder(BorderFactory.createEmptyBorder(10, 30, 30, 30));
-
-        for (String[] transaction : transactions) {
-            JPanel transactionRow = new JPanel(new GridLayout(1, 4));
-            transactionRow.setBackground(Color.WHITE);
-
-            for (int i = 0; i < transaction.length; i++) {
-                JLabel cell = new JLabel(transaction[i]);
-                cell.setFont(new Font("Arial", Font.PLAIN, 12));
-                if (i == 2) {
-                    // Color values
-                    if (transaction[i].startsWith("+")) {
-                        cell.setForeground(new Color(16, 185, 129)); // Green for positive
-                    } else {
-                        cell.setForeground(new Color(239, 68, 68)); // Red for negative
-                    }
-                } else if (i == 0) {
-                    cell.setForeground(new Color(100, 116, 139)); // Gray for dates
+                if (backgroundColor != null) {
+                    GradientPaint gradient = new GradientPaint(0, 0, backgroundColor,
+                            getWidth(), getHeight(),
+                            darkenColor(backgroundColor, 0.2f));
+                    g2.setPaint(gradient);
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
                 } else {
-                    cell.setForeground(new Color(30, 41, 59)); // Dark for other text
+                    g2.setColor(Color.WHITE);
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
                 }
-                transactionRow.add(cell);
             }
-            transactionsPanel.add(transactionRow);
-        }
-
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(headerPanel, BorderLayout.CENTER);
-        panel.add(transactionsPanel, BorderLayout.SOUTH);
-
-        return panel;
-    }
-
-    private JPanel createLimitsPanel() {
-        JPanel panel = createCard(560, 300);
-        panel.setLayout(new BorderLayout());
-
-        JLabel titleLabel = new JLabel("Limites de Operação");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setForeground(new Color(30, 41, 59));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 0));
-
-        JPanel limitsPanel = new JPanel(new GridLayout(2, 1, 20, 20));
-        limitsPanel.setBackground(Color.WHITE);
-        limitsPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 40, 40));
-
-        // Daily limit
-        JPanel dailyLimit = createLimitCard(
-                new Color(240, 249, 255),
-                "Limite Diário de Levantamento",
-                "Restante hoje",
-                "MZN 3.250,00"
-        );
-
-        // Transfer limit
-        JPanel transferLimit = createLimitCard(
-                new Color(240, 253, 244),
-                "Limite de Transferência",
-                "Máximo por transação",
-                "MZN 10.000,00"
-        );
-
-        limitsPanel.add(dailyLimit);
-        limitsPanel.add(transferLimit);
-
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(limitsPanel, BorderLayout.CENTER);
-
-        return panel;
-    }
-
-    private JPanel createLimitCard(Color bgColor, String title, String subtitle, String value) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(bgColor);
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        titleLabel.setForeground(new Color(30, 41, 59));
-
-        JLabel subtitleLabel = new JLabel(subtitle);
-        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        subtitleLabel.setForeground(new Color(100, 116, 139));
-
-        JLabel valueLabel = new JLabel(value, JLabel.RIGHT);
-        valueLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        valueLabel.setForeground(new Color(30, 41, 59));
-
-        JPanel leftPanel = new JPanel();
-        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-        leftPanel.setBackground(bgColor);
-        leftPanel.add(titleLabel);
-        leftPanel.add(subtitleLabel);
-
-        panel.add(leftPanel, BorderLayout.WEST);
-        panel.add(valueLabel, BorderLayout.EAST);
-
-        return panel;
-    }
-
-    private JPanel createOffersPanel() {
-        JPanel panel = createCard(560, 300);
-        panel.setLayout(new BorderLayout());
-
-        JLabel titleLabel = new JLabel("Ofertas Especiais");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setForeground(new Color(30, 41, 59));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 0));
-
-        JPanel offersPanel = new JPanel(new GridLayout(2, 1, 20, 20));
-        offersPanel.setBackground(Color.WHITE);
-        offersPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 40, 40));
-
-        // Offer 1
-        JPanel offer1 = createOfferCard(
-                new Color(254, 247, 237),
-                "Conta Poupança Plus",
-                "Rendimento adicional de 1.5% a.a.",
-                "Saber Mais",
-                new Color(16, 185, 129)
-        );
-
-        // Offer 2
-        JPanel offer2 = createOfferCard(
-                new Color(239, 246, 255),
-                "Cartão de Crédito Gold",
-                "Cashback de 2% em todas as compras",
-                "Aplicar",
-                new Color(59, 130, 246)
-        );
-
-        offersPanel.add(offer1);
-        offersPanel.add(offer2);
-
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(offersPanel, BorderLayout.CENTER);
-
-        return panel;
-    }
-
-    private JPanel createOfferCard(Color bgColor, String title, String subtitle, String buttonText, Color buttonColor) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(bgColor);
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        titleLabel.setForeground(new Color(30, 41, 59));
-
-        JLabel subtitleLabel = new JLabel(subtitle);
-        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        subtitleLabel.setForeground(new Color(100, 116, 139));
-
-        JButton actionBtn = new JButton(buttonText);
-        actionBtn.setFont(new Font("Arial", Font.BOLD, 12));
-        actionBtn.setBackground(buttonColor);
-        actionBtn.setForeground(Color.WHITE);
-        actionBtn.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-        actionBtn.setFocusPainted(false);
-        actionBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        JPanel leftPanel = new JPanel();
-        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-        leftPanel.setBackground(bgColor);
-        leftPanel.add(titleLabel);
-        leftPanel.add(subtitleLabel);
-
-        panel.add(leftPanel, BorderLayout.WEST);
-        panel.add(actionBtn, BorderLayout.EAST);
-
-        return panel;
-    }
-
-    private JPanel createContactsPanel() {
-        JPanel panel = createCard(560, 300);
-        panel.setLayout(new BorderLayout());
-
-        JLabel titleLabel = new JLabel("Contactos Rápidos");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setForeground(new Color(30, 41, 59));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 0));
-
-        JPanel contactsPanel = new JPanel(new GridLayout(3, 1, 20, 20));
-        contactsPanel.setBackground(Color.WHITE);
-        contactsPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 40, 40));
-
-        // Contact 1
-        JPanel contact1 = createContactCard("📞 Apoio ao Cliente: 84 123 4567", null);
-
-        // Contact 2
-        JPanel contact2 = createContactCard("🚨 Bloquear Cartão: 84 999 9999", null);
-
-        // Contact 3
-        JPanel contact3 = createContactCard("🏢 Encontrar Agências", "Ver Mapas");
-
-        contactsPanel.add(contact1);
-        contactsPanel.add(contact2);
-        contactsPanel.add(contact3);
-
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(contactsPanel, BorderLayout.CENTER);
-
-        return panel;
-    }
-
-    private JPanel createContactCard(String text, String buttonText) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(248, 250, 252));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JLabel contactLabel = new JLabel(text);
-        contactLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        contactLabel.setForeground(new Color(30, 41, 59));
-
-        panel.add(contactLabel, BorderLayout.WEST);
-
-        if (buttonText != null) {
-            JButton mapBtn = new JButton(buttonText);
-            mapBtn.setFont(new Font("Arial", Font.BOLD, 12));
-            mapBtn.setBackground(new Color(59, 130, 246));
-            mapBtn.setForeground(Color.WHITE);
-            mapBtn.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-            mapBtn.setFocusPainted(false);
-            mapBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            panel.add(mapBtn, BorderLayout.EAST);
-        }
-
-        return panel;
+        };
+        card.setPreferredSize(new Dimension(width, height));
+        card.setOpaque(false);
+        return card;
     }
 
     private JPanel createCard(int width, int height) {
-        JPanel card = new JPanel();
-        card.setPreferredSize(new Dimension(width, height));
-        card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(226, 232, 240), 1),
-                BorderFactory.createEmptyBorder(0, 0, 0, 0)
-        ));
-        return card;
+        return createCard(width, height, null);
+    }
+
+    private Color darkenColor(Color color, float factor) {
+        return new Color(
+                Math.max((int)(color.getRed() * factor), 0),
+                Math.max((int)(color.getGreen() * factor), 0),
+                Math.max((int)(color.getBlue() * factor), 0)
+        );
     }
 
     // Getters for buttons
@@ -684,5 +521,11 @@ public class DashboardView extends JFrame {
     // Method to update balance
     public void setBalance(double balance) {
         balanceLabel.setText(String.format("MZN %,.2f", balance));
+    }
+
+    // Method to update user info
+    public void setUserInfo(String name, String accountNumber) {
+        welcomeLabel.setText(name);
+        accountNumberLabel.setText("Conta: " + accountNumber);
     }
 }

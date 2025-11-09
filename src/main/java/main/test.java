@@ -1,10 +1,11 @@
 package main;
 
-import view.login.componet.Loginview;
+import view.*;
 
 public class test {
     public static void main(String[] args) {
-        Loginview s = new Loginview();
+        //Loginview s = new Loginview();
+        DashboardView s = new DashboardView();
         s.setVisible(true);
     }
 }
