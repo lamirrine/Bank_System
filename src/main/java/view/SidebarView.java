@@ -1,4 +1,3 @@
-// view/SidebarView.java
 package view;
 
 import net.miginfocom.swing.MigLayout;
@@ -6,9 +5,11 @@ import javax.swing.*;
 import java.awt.*;
 
 public class SidebarView extends JPanel {
-    private JButton depositBtn, withdrawBtn, transferBtn, statementBtn, logoutBtn;
+    private JButton homeBtn, depositBtn, withdrawBtn, transferBtn, statementBtn, logoutBtn;
     private JLabel welcomeLabel;
     private JLabel accountNumberLabel;
+    private JButton activeButton;
+    private Color activeColor;
 
     public SidebarView() {
         initializeUI();
@@ -47,19 +48,27 @@ public class SidebarView extends JPanel {
 
         String[] menuItems = {"🏠 Início", "💰 Depósito", "💸 Levantamento", "🔄 Transferência", "📊 Extrato", "👤 Perfil"};
         Color[] menuColors = {
-                new Color(59, 130, 246),
-                new Color(16, 185, 129),
-                new Color(239, 68, 68),
-                new Color(168, 85, 247),
-                new Color(245, 158, 11),
-                new Color(14, 165, 233)
+                new Color(59, 130, 246),  // Azul para Início
+                new Color(16, 185, 129),  // Verde para Depósito
+                new Color(239, 68, 68),   // Vermelho para Levantamento
+                new Color(168, 85, 247),  // Roxo para Transferência
+                new Color(245, 158, 11),  // Laranja para Extrato
+                new Color(14, 165, 233)   // Azul claro para Perfil
         };
 
         for (int i = 0; i < menuItems.length; i++) {
             JButton menuBtn = createMenuButton(menuItems[i], menuColors[i], i == 0);
             menuPanel.add(menuBtn, "growx, h 50!");
 
+            // Configurar os botões específicos
             switch (menuItems[i]) {
+                case "🏠 Início":
+                    homeBtn = menuBtn;
+                    if (i == 0) {
+                        activeButton = homeBtn;
+                        activeColor = menuColors[i];
+                    }
+                    break;
                 case "💰 Depósito": depositBtn = menuBtn; break;
                 case "💸 Levantamento": withdrawBtn = menuBtn; break;
                 case "🔄 Transferência": transferBtn = menuBtn; break;
@@ -78,7 +87,10 @@ public class SidebarView extends JPanel {
 
                 int cornerRadius = 15;
 
-                if (isActive) {
+                // Verificar se este botão é o ativo
+                boolean isThisButtonActive = (this == activeButton);
+
+                if (isThisButtonActive) {
                     GradientPaint gradient = new GradientPaint(
                             0, 0, color.brighter(),
                             0, getHeight(), color
@@ -93,7 +105,7 @@ public class SidebarView extends JPanel {
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
 
                 // Borda do botão
-                if (isActive) {
+                if (isThisButtonActive) {
                     g2.setColor(color.brighter());
                     g2.setStroke(new BasicStroke(2));
                 } else {
@@ -110,6 +122,7 @@ public class SidebarView extends JPanel {
 
             @Override
             protected void paintBorder(Graphics g) {
+                // Não pintar borda padrão
             }
         };
 
@@ -129,6 +142,7 @@ public class SidebarView extends JPanel {
                 button.repaint();
             }
         });
+
         return button;
     }
 
@@ -193,16 +207,34 @@ public class SidebarView extends JPanel {
         return userPanel;
     }
 
+    // MÉTODO MELHORADO: Atualizar o botão ativo
+    public void setActiveButton(JButton button) {
+        if (activeButton != null && activeButton != button) {
+            // Redesenha o botão anterior para estado normal
+            activeButton.repaint();
+        }
+
+        activeButton = button;
+        if (activeButton != null) {
+            // Redesenha o novo botão ativo
+            activeButton.repaint();
+        }
+    }
+
+    // MÉTODO ESPECÍFICO para setar o Home como ativo
+    public void setHomeActive() {
+        setActiveButton(homeBtn);
+    }
+
     // Getters for buttons
+    public JButton getHomeButton() { return homeBtn; }
     public JButton getDepositBtn() { return depositBtn; }
     public JButton getWithdrawBtn() { return withdrawBtn; }
     public JButton getTransferBtn() { return transferBtn; }
     public JButton getStatementBtn() { return statementBtn; }
     public JButton getLogoutBtn() { return logoutBtn; }
 
-    // Method to update user info
-
-
+    // Método para atualizar informações do usuário
     public void setUserInfo(String name, String accountNumber) {
         if (welcomeLabel != null) {
             welcomeLabel.setText(name);
@@ -221,36 +253,12 @@ public class SidebarView extends JPanel {
                 initials += names[1].charAt(0);
             }
 
-            // CORREÇÃO: Acessar o avatarLabel corretamente
             updateAvatarLabel(initials);
         }
     }
 
-    // Novo método para atualizar o avatar de forma segura
+    // Método para atualizar o avatar
     private void updateAvatarLabel(String initials) {
-        // Encontrar o avatarLabel de forma segura
-        Component[] userPanelComponents = ((JPanel) getComponent(2)).getComponents();
-        for (Component comp : userPanelComponents) {
-            if (comp instanceof JPanel) {
-                JPanel userInfoPanel = (JPanel) comp;
-                Component[] infoComponents = userInfoPanel.getComponents();
-                for (Component infoComp : infoComponents) {
-                    if (infoComp instanceof JPanel) {
-                        JPanel avatarPanel = (JPanel) infoComp;
-                        Component[] avatarComponents = avatarPanel.getComponents();
-                        for (Component avatarComp : avatarComponents) {
-                            if (avatarComp instanceof JLabel) {
-                                JLabel avatarLabel = (JLabel) avatarComp;
-                                avatarLabel.setText(initials);
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Método alternativo - buscar por nome se o anterior não funcionar
         try {
             JPanel userPanel = (JPanel) getComponent(2);
             JPanel userInfoPanel = (JPanel) userPanel.getComponent(0);

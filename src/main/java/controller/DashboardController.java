@@ -22,7 +22,7 @@ public class DashboardController {
     private DepositController depositController;
     private WithdrawController withdrawController;
     private TransferController transferController;
-    private StatementController statementController; // NOVO
+    private StatementController statementController;
 
     public DashboardController(DashboardView view, AccountService accountService,
                                StatementService statementService, CustomerService customerService,
@@ -43,7 +43,7 @@ public class DashboardController {
         try {
             List<Account> accountsForUse = customerAccounts != null ? customerAccounts : List.of();
 
-            // Inicializar DepositController
+            // Inicializar controllers
             this.depositController = new DepositController(
                     view.getDepositView(),
                     accountService,
@@ -51,7 +51,6 @@ public class DashboardController {
                     currentCustomer.getUserId()
             );
 
-            // Inicializar WithdrawController
             this.withdrawController = new WithdrawController(
                     view.getWithdrawView(),
                     accountService,
@@ -59,7 +58,6 @@ public class DashboardController {
                     currentCustomer.getUserId()
             );
 
-            // Inicializar TransferController
             this.transferController = new TransferController(
                     view.getTransferView(),
                     accountService,
@@ -67,7 +65,6 @@ public class DashboardController {
                     currentCustomer.getUserId()
             );
 
-            // Inicializar StatementController - NOVO
             this.statementController = new StatementController(
                     view.getStatementView(),
                     statementService,
@@ -79,7 +76,7 @@ public class DashboardController {
             setupDepositNavigation();
             setupWithdrawNavigation();
             setupTransferNavigation();
-            setupStatementNavigation(); // NOVO
+            setupStatementNavigation();
 
         } catch (Exception e) {
             System.err.println("Erro ao inicializar controllers: " + e.getMessage());
@@ -88,10 +85,34 @@ public class DashboardController {
     }
 
     private void setupSidebarListeners() {
-        view.getSidebarView().getDepositBtn().addActionListener(e -> openDeposit());
-        view.getSidebarView().getWithdrawBtn().addActionListener(e -> openWithdraw());
-        view.getSidebarView().getTransferBtn().addActionListener(e -> openTransfer());
-        view.getSidebarView().getStatementBtn().addActionListener(e -> openStatement()); // NOVO
+        // Home button
+        view.getSidebarView().getHomeButton().addActionListener(e -> showHomepage());
+
+        // Deposit button
+        view.getSidebarView().getDepositBtn().addActionListener(e -> {
+            view.getSidebarView().setActiveButton(view.getSidebarView().getDepositBtn());
+            openDeposit();
+        });
+
+        // Withdraw button
+        view.getSidebarView().getWithdrawBtn().addActionListener(e -> {
+            view.getSidebarView().setActiveButton(view.getSidebarView().getWithdrawBtn());
+            openWithdraw();
+        });
+
+        // Transfer button
+        view.getSidebarView().getTransferBtn().addActionListener(e -> {
+            view.getSidebarView().setActiveButton(view.getSidebarView().getTransferBtn());
+            openTransfer();
+        });
+
+        // Statement button
+        view.getSidebarView().getStatementBtn().addActionListener(e -> {
+            view.getSidebarView().setActiveButton(view.getSidebarView().getStatementBtn());
+            openStatement();
+        });
+
+        // Logout button
         view.getSidebarView().getLogoutBtn().addActionListener(e -> logout());
     }
 
@@ -113,10 +134,22 @@ public class DashboardController {
         });
     }
 
-    private void setupStatementNavigation() { // NOVO
+    private void setupStatementNavigation() {
         view.getStatementView().getCancelButton().addActionListener(e -> {
             returnToHomepage();
         });
+    }
+
+    // NOVO MÉTODO: showHomepage
+    private void showHomepage() {
+        try {
+            view.getSidebarView().setActiveButton(view.getSidebarView().getHomeButton());
+            view.showHomepage();
+            // Atualizar dados na homepage se necessário
+            refreshDashboardData();
+        } catch (Exception ex) {
+            System.err.println("Erro ao voltar para homepage: " + ex.getMessage());
+        }
     }
 
     private void openDeposit() {
@@ -161,7 +194,7 @@ public class DashboardController {
         }
     }
 
-    private void openStatement() { // NOVO
+    private void openStatement() {
         try {
             if (customerAccounts != null) {
                 statementController.updateCustomerAccounts(customerAccounts);
@@ -175,8 +208,7 @@ public class DashboardController {
     }
 
     private void returnToHomepage() {
-        view.showHomepage();
-        refreshDashboardData();
+        showHomepage();
     }
 
     private void refreshDashboardData() {
@@ -247,7 +279,6 @@ public class DashboardController {
         }
     }
 
-    // NOVO: Atualizar todos os controllers com as contas
     private void updateAllControllers() {
         List<Account> accounts = customerAccounts != null ? customerAccounts : List.of();
 
@@ -281,20 +312,18 @@ public class DashboardController {
         System.out.println("Carregando transações...");
 
         try {
-            List<model.entities.Transaction> transactions = List.of(); // Inicializar vazio
+            List<model.entities.Transaction> transactions = List.of();
 
             if (primaryAccount != null) {
                 System.out.println("Carregando transações da conta: " + primaryAccount.getAccountId());
                 transactions = statementService.getRecentTransactionsByAccount(
                         primaryAccount.getAccountId(), 10);
             } else if (customerAccounts != null && !customerAccounts.isEmpty()) {
-                // Se primaryAccount não foi definida, usar a primeira conta
                 Account firstAccount = customerAccounts.get(0);
                 System.out.println("Carregando transações da primeira conta: " + firstAccount.getAccountId());
                 transactions = statementService.getRecentTransactionsByAccount(
                         firstAccount.getAccountId(), 10);
             } else {
-                // Carregar transações do cliente
                 System.out.println("Carregando transações do cliente: " + currentCustomer.getUserId());
                 transactions = statementService.getRecentTransactionsByCustomer(
                         currentCustomer.getUserId(), 10);
@@ -313,23 +342,17 @@ public class DashboardController {
         System.out.println("Atualizando limites...");
 
         if (primaryAccount != null) {
-            System.out.println("Usando limites da conta principal: " +
-                    primaryAccount.getDailyWithdrawLimit() + ", " + primaryAccount.getDailyTransferLimit());
             view.getHomepageView().updateLimits(
                     primaryAccount.getDailyWithdrawLimit(),
                     primaryAccount.getDailyTransferLimit()
             );
         } else if (customerAccounts != null && !customerAccounts.isEmpty()) {
             Account firstAccount = customerAccounts.get(0);
-            System.out.println("Usando limites da primeira conta: " +
-                    firstAccount.getDailyWithdrawLimit() + ", " + firstAccount.getDailyTransferLimit());
             view.getHomepageView().updateLimits(
                     firstAccount.getDailyWithdrawLimit(),
                     firstAccount.getDailyTransferLimit()
             );
         } else {
-            // Valores padrão se não houver conta
-            System.out.println("Usando limites padrão");
             view.getHomepageView().updateLimits(3250.00, 10000.00);
         }
     }
@@ -349,13 +372,11 @@ public class DashboardController {
                 JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            // Encerrar o StatementController se existir
             if (statementController != null) {
                 statementController.shutdown();
             }
 
             view.dispose();
-            // Voltar para a tela de login
             new Loginview().setVisible(true);
         }
     }

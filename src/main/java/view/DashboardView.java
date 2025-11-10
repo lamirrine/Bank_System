@@ -1,9 +1,6 @@
 package view;
 
 import net.miginfocom.swing.MigLayout;
-import view.WithdrawView;
-import view.TransferView;
-import view.StatementView;
 import javax.swing.*;
 import java.awt.*;
 
@@ -13,7 +10,7 @@ public class DashboardView extends JFrame {
     private DepositView depositView;
     private WithdrawView withdrawView;
     private TransferView transferView;
-    private StatementView statementView;
+    private StatementView statementView; // NOVO
     private JPanel mainContentPanel;
     private CardLayout cardLayout;
 
@@ -50,13 +47,13 @@ public class DashboardView extends JFrame {
         withdrawView = new WithdrawView();
         mainContentPanel.add(withdrawView, "WITHDRAW");
 
+        // Transfer view
         transferView = new TransferView();
         mainContentPanel.add(transferView, "TRANSFER");
 
+        // Statement view - NOVO
         statementView = new StatementView();
         mainContentPanel.add(statementView, "STATEMENT");
-
-        add(mainContentPanel, "grow");
 
         add(mainContentPanel, "grow");
     }
@@ -78,17 +75,17 @@ public class DashboardView extends JFrame {
         cardLayout.show(mainContentPanel, "TRANSFER");
     }
 
-    public void showStatementView() {
+    public void showStatementView() { // NOVO
         cardLayout.show(mainContentPanel, "STATEMENT");
     }
 
-    // Getters para acessar os componentes
+    // Getters
     public SidebarView getSidebarView() { return sidebarView; }
     public HomepageView getHomepageView() { return homepageView; }
     public DepositView getDepositView() { return depositView; }
     public WithdrawView getWithdrawView() { return withdrawView; }
     public TransferView getTransferView() { return transferView; }
-    public StatementView getStatementView() { return statementView; }
+    public StatementView getStatementView() { return statementView; } // NOVO
 
     // Métodos para atualizar dados
     public void setBalance(double balance) {
