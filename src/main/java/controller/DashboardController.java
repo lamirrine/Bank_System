@@ -1,12 +1,13 @@
-// controller/DashboardController.java
 package controller;
 
 import model.entities.Account;
 import model.entities.Customer;
-import model.entities.Transaction;
 import model.services.AccountService;
+import model.services.CustomerService;
 import model.services.StatementService;
 import view.DashboardView;
+import view.login.componet.Loginview;
+
 import javax.swing.*;
 import java.util.List;
 
@@ -14,35 +15,185 @@ public class DashboardController {
     private DashboardView view;
     private AccountService accountService;
     private StatementService statementService;
+    private CustomerService customerService;
     private Customer currentCustomer;
-    private Account currentAccount;
+    private List<Account> customerAccounts;
+    private Account primaryAccount;
+    private DepositController depositController;
+    private WithdrawController withdrawController;
+    private TransferController transferController;
+    private StatementController statementController; // NOVO
 
     public DashboardController(DashboardView view, AccountService accountService,
-                               StatementService statementService, Customer customer) {
+                               StatementService statementService, CustomerService customerService,
+                               Customer customer) {
         this.view = view;
         this.accountService = accountService;
         this.statementService = statementService;
+        this.customerService = customerService;
         this.currentCustomer = customer;
 
-       // initializeController();
+        System.out.println("DashboardController iniciado para: " + customer.getFullName());
+
+        initializeController();
         loadDashboardData();
     }
 
-   /* private void initializeController() {
-        // Configurar listeners dos botões
-        view.getDepositBtn().addActionListener(e -> openDeposit());
-        view.getWithdrawBtn().addActionListener(e -> openWithdraw());
-        view.getTransferBtn().addActionListener(e -> openTransfer());
-        view.getStatementBtn().addActionListener(e -> openStatement());
-        view.getLogoutBtn().addActionListener(e -> logout());
-    }*/
+    private void initializeController() {
+        try {
+            List<Account> accountsForUse = customerAccounts != null ? customerAccounts : List.of();
+
+            // Inicializar DepositController
+            this.depositController = new DepositController(
+                    view.getDepositView(),
+                    accountService,
+                    accountsForUse,
+                    currentCustomer.getUserId()
+            );
+
+            // Inicializar WithdrawController
+            this.withdrawController = new WithdrawController(
+                    view.getWithdrawView(),
+                    accountService,
+                    accountsForUse,
+                    currentCustomer.getUserId()
+            );
+
+            // Inicializar TransferController
+            this.transferController = new TransferController(
+                    view.getTransferView(),
+                    accountService,
+                    accountsForUse,
+                    currentCustomer.getUserId()
+            );
+
+            // Inicializar StatementController - NOVO
+            this.statementController = new StatementController(
+                    view.getStatementView(),
+                    statementService,
+                    accountsForUse,
+                    currentCustomer.getUserId()
+            );
+
+            setupSidebarListeners();
+            setupDepositNavigation();
+            setupWithdrawNavigation();
+            setupTransferNavigation();
+            setupStatementNavigation(); // NOVO
+
+        } catch (Exception e) {
+            System.err.println("Erro ao inicializar controllers: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void setupSidebarListeners() {
+        view.getSidebarView().getDepositBtn().addActionListener(e -> openDeposit());
+        view.getSidebarView().getWithdrawBtn().addActionListener(e -> openWithdraw());
+        view.getSidebarView().getTransferBtn().addActionListener(e -> openTransfer());
+        view.getSidebarView().getStatementBtn().addActionListener(e -> openStatement()); // NOVO
+        view.getSidebarView().getLogoutBtn().addActionListener(e -> logout());
+    }
+
+    private void setupDepositNavigation() {
+        view.getDepositView().getCancelButton().addActionListener(e -> {
+            returnToHomepage();
+        });
+    }
+
+    private void setupWithdrawNavigation() {
+        view.getWithdrawView().getCancelButton().addActionListener(e -> {
+            returnToHomepage();
+        });
+    }
+
+    private void setupTransferNavigation() {
+        view.getTransferView().getCancelButton().addActionListener(e -> {
+            returnToHomepage();
+        });
+    }
+
+    private void setupStatementNavigation() { // NOVO
+        view.getStatementView().getCancelButton().addActionListener(e -> {
+            returnToHomepage();
+        });
+    }
+
+    private void openDeposit() {
+        try {
+            if (customerAccounts != null) {
+                depositController.updateCustomerAccounts(customerAccounts);
+            }
+            depositController.clearForm();
+            view.showDepositView();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view,
+                    "Erro ao abrir tela de depósito: " + ex.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void openWithdraw() {
+        try {
+            if (customerAccounts != null) {
+                withdrawController.updateCustomerAccounts(customerAccounts);
+            }
+            withdrawController.clearForm();
+            view.showWithdrawView();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view,
+                    "Erro ao abrir tela de levantamento: " + ex.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void openTransfer() {
+        try {
+            if (customerAccounts != null) {
+                transferController.updateCustomerAccounts(customerAccounts);
+            }
+            transferController.clearForm();
+            view.showTransferView();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view,
+                    "Erro ao abrir tela de transferência: " + ex.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void openStatement() { // NOVO
+        try {
+            if (customerAccounts != null) {
+                statementController.updateCustomerAccounts(customerAccounts);
+            }
+            view.showStatementView();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view,
+                    "Erro ao abrir tela de extrato: " + ex.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void returnToHomepage() {
+        view.showHomepage();
+        refreshDashboardData();
+    }
+
+    private void refreshDashboardData() {
+        // Recarregar dados atualizados
+        loadCustomerAccounts();
+        loadRecentTransactions();
+        updateLimitsDisplay();
+    }
 
     private void loadDashboardData() {
         try {
             // Carregar dados reais do cliente
+            view.setUserInfo(currentCustomer.getFullName(), getPrimaryAccountNumber());
+            view.getHomepageView().updateUserInfo(currentCustomer.getFirstName());
             loadCustomerAccounts();
             loadRecentTransactions();
-            updateBalanceDisplay();
+            updateLimitsDisplay();
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(view,
@@ -52,60 +203,144 @@ public class DashboardController {
     }
 
     private void loadCustomerAccounts() {
-        // TODO: Implementar busca de contas do cliente
-        // List<Account> accounts = accountService.findAccountsByCustomerId(currentCustomer.getUserId());
+        System.out.println("Carregando contas para customerId: " + currentCustomer.getUserId());
 
-        // Por enquanto, vamos usar dados mock
-        currentAccount = new Account();
-        //currentAccount.setAccountNumber("12345-X");
-       // currentAccount.setBalance(12345.67);
-        //currentAccount.setDailyWithdrawLimit(3250.00);
-        //currentAccount.setDailyTransferLimit(10000.00);
+        try {
+            customerAccounts = accountService.findAccountsByCustomerId(currentCustomer.getUserId());
+            System.out.println("Número de contas encontradas: " + (customerAccounts != null ? customerAccounts.size() : "null"));
 
-       //view.setBalance(currentAccount.getBalance());
+            if (customerAccounts != null && !customerAccounts.isEmpty()) {
+                // Log para debug
+                for (Account acc : customerAccounts) {
+                    System.out.println("Conta encontrada: " + acc.getAccountNumber() + " - Saldo: " + acc.getBalance());
+                }
+
+                // Usar a primeira conta como principal
+                primaryAccount = customerAccounts.get(0);
+                System.out.println("Conta principal: " + primaryAccount.getAccountNumber());
+
+                // Atualizar a view com as contas
+                view.getHomepageView().updateAccounts(customerAccounts);
+
+                // Calcular saldo total SOMANDO todas as contas
+                double totalBalance = calculateTotalBalance(customerAccounts);
+                System.out.println("Saldo total calculado: " + totalBalance);
+                view.setBalance(totalBalance);
+
+                // Atualizar todos os controllers com as contas atualizadas
+                updateAllControllers();
+
+            } else {
+                System.out.println("Nenhuma conta encontrada!");
+                view.getHomepageView().updateAccounts(List.of());
+                view.setBalance(0.0);
+
+                // Atualizar controllers com lista vazia
+                updateAllControllers();
+            }
+        } catch (Exception e) {
+            System.err.println("ERRO ao carregar contas: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(view,
+                    "Erro ao carregar contas: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // NOVO: Atualizar todos os controllers com as contas
+    private void updateAllControllers() {
+        List<Account> accounts = customerAccounts != null ? customerAccounts : List.of();
+
+        if (depositController != null) {
+            depositController.updateCustomerAccounts(accounts);
+        }
+        if (withdrawController != null) {
+            withdrawController.updateCustomerAccounts(accounts);
+        }
+        if (transferController != null) {
+            transferController.updateCustomerAccounts(accounts);
+        }
+        if (statementController != null) {
+            statementController.updateCustomerAccounts(accounts);
+        }
+    }
+
+    private double calculateTotalBalance(List<Account> accounts) {
+        if (accounts == null || accounts.isEmpty()) {
+            return 0.0;
+        }
+
+        double total = 0.0;
+        for (Account account : accounts) {
+            total += account.getBalance();
+        }
+        return total;
     }
 
     private void loadRecentTransactions() {
-        try {
-            // TODO: Implementar busca de transações reais
-            // List<Transaction> transactions = statementService.getRecentTransactions(currentAccount.getAccountId(), 5);
+        System.out.println("Carregando transações...");
 
-            // Por enquanto, vamos usar dados mock
-            // As transações já estão sendo exibidas no layout
+        try {
+            List<model.entities.Transaction> transactions = List.of(); // Inicializar vazio
+
+            if (primaryAccount != null) {
+                System.out.println("Carregando transações da conta: " + primaryAccount.getAccountId());
+                transactions = statementService.getRecentTransactionsByAccount(
+                        primaryAccount.getAccountId(), 10);
+            } else if (customerAccounts != null && !customerAccounts.isEmpty()) {
+                // Se primaryAccount não foi definida, usar a primeira conta
+                Account firstAccount = customerAccounts.get(0);
+                System.out.println("Carregando transações da primeira conta: " + firstAccount.getAccountId());
+                transactions = statementService.getRecentTransactionsByAccount(
+                        firstAccount.getAccountId(), 10);
+            } else {
+                // Carregar transações do cliente
+                System.out.println("Carregando transações do cliente: " + currentCustomer.getUserId());
+                transactions = statementService.getRecentTransactionsByCustomer(
+                        currentCustomer.getUserId(), 10);
+            }
+
+            System.out.println("Número de transações encontradas: " + transactions.size());
+            view.getHomepageView().updateTransactions(transactions);
 
         } catch (Exception e) {
             System.err.println("Erro ao carregar transações: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private void updateBalanceDisplay() {
-        if (currentAccount != null) {
-            //view.setBalance(currentAccount.getBalance());
+    private void updateLimitsDisplay() {
+        System.out.println("Atualizando limites...");
+
+        if (primaryAccount != null) {
+            System.out.println("Usando limites da conta principal: " +
+                    primaryAccount.getDailyWithdrawLimit() + ", " + primaryAccount.getDailyTransferLimit());
+            view.getHomepageView().updateLimits(
+                    primaryAccount.getDailyWithdrawLimit(),
+                    primaryAccount.getDailyTransferLimit()
+            );
+        } else if (customerAccounts != null && !customerAccounts.isEmpty()) {
+            Account firstAccount = customerAccounts.get(0);
+            System.out.println("Usando limites da primeira conta: " +
+                    firstAccount.getDailyWithdrawLimit() + ", " + firstAccount.getDailyTransferLimit());
+            view.getHomepageView().updateLimits(
+                    firstAccount.getDailyWithdrawLimit(),
+                    firstAccount.getDailyTransferLimit()
+            );
+        } else {
+            // Valores padrão se não houver conta
+            System.out.println("Usando limites padrão");
+            view.getHomepageView().updateLimits(3250.00, 10000.00);
         }
     }
 
-    private void openDeposit() {
-        JOptionPane.showMessageDialog(view,
-                "Funcionalidade de Depósito em desenvolvimento!",
-                "Em Desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void openWithdraw() {
-        JOptionPane.showMessageDialog(view,
-                "Funcionalidade de Levantamento em desenvolvimento!",
-                "Em Desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void openTransfer() {
-        JOptionPane.showMessageDialog(view,
-                "Funcionalidade de Transferência em desenvolvimento!",
-                "Em Desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void openStatement() {
-        JOptionPane.showMessageDialog(view,
-                "Funcionalidade de Extrato em desenvolvimento!",
-                "Em Desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
+    private String getPrimaryAccountNumber() {
+        if (primaryAccount != null) {
+            return primaryAccount.getAccountNumber();
+        } else if (customerAccounts != null && !customerAccounts.isEmpty()) {
+            return customerAccounts.get(0).getAccountNumber();
+        }
+        return "N/A";
     }
 
     private void logout() {
@@ -114,9 +349,27 @@ public class DashboardController {
                 JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
+            // Encerrar o StatementController se existir
+            if (statementController != null) {
+                statementController.shutdown();
+            }
+
             view.dispose();
             // Voltar para a tela de login
-            // new LoginController().show();
+            new Loginview().setVisible(true);
         }
+    }
+
+    // Getters para acesso externo
+    public Customer getCurrentCustomer() {
+        return currentCustomer;
+    }
+
+    public List<Account> getCustomerAccounts() {
+        return customerAccounts;
+    }
+
+    public Account getPrimaryAccount() {
+        return primaryAccount;
     }
 }

@@ -22,7 +22,6 @@ public class App {
                 JOptionPane.showMessageDialog(null,
                         "Erro ao iniciar aplicação: " + e.getMessage(),
                         "Erro Fatal", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
             }
         });
     }

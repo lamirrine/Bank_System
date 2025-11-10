@@ -7,6 +7,9 @@ bank_system/
         │   │   └── DatabaseConnection.java
         │   │
         │   ├── controller/
+        │   │   └── AuthenticationControler.java
+        │   │   ├── DashboardController.java
+        │   │   ├── MainControler.java
         │   │
         │   ├── main/
         │   │   └── App.java
@@ -36,6 +39,7 @@ bank_system/
         │   │   │   ├── Bank.java
         │   │   │   ├── Customer.java
         │   │   │   ├── Employee.java
+        │   │   │   ├── User.java
         │   │   │   └── Transaction.java
         │   │
         │   │   ├── enums/
@@ -66,6 +70,9 @@ bank_system/
         │   │       └── PinUtil.java
         │   │
         │   └── view/
+        │       └── DashboardView.java
+        │       ├── HomepageView.java
+        │       ├── SidebarView.java
         │
         └── resources/
             └── db/

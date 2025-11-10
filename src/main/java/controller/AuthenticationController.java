@@ -2,7 +2,7 @@ package controller;
 
 import model.entities.Customer;
 import model.entities.User;
-import model.services.AuthenticationService;
+import model.services.*;
 import view.login.componet.Loginview;
 import view.UserTypeSelectionView;
 import view.DashboardView;
@@ -12,6 +12,7 @@ public class AuthenticationController {
     private UserTypeSelectionView typeSelectionView;
     private Loginview loginview;
     private AuthenticationService authService;
+    private CustomerService customerService;
 
     public AuthenticationController(AuthenticationService authService) {
         this.authService = authService;
@@ -99,11 +100,20 @@ public class AuthenticationController {
     }
 
     private void openCustomerDashboard(Customer customer) {
+        AccountService accountService = new AccountService();
+        StatementService statementService = new StatementService();
+        CustomerService customerService = new CustomerService();
         DashboardView dashboardView = new DashboardView();
 
-        // Por enquanto, vamos usar serviços null
         DashboardController dashboardController = new DashboardController(
-                dashboardView, null, null, customer);
+                dashboardView, accountService, statementService, customerService, customer
+        );
+
+        dashboardView.setVisible(true);
+
+        // Por enquanto, vamos usar serviços null
+        // DashboardController dashboardController = new DashboardController(
+        // dashboardView, null, null, customer);
 
         dashboardView.setVisible(true);
 

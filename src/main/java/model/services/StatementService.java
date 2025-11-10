@@ -1,63 +1,146 @@
 package model.services;
 
-import model.dao.IAccountDAO;
 import model.dao.ITransactionDAO;
+import model.dao.impl.TransactionDAO;
 import model.entities.Transaction;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Serviço responsável por gerar extratos e histórico de transações.
- */
 public class StatementService {
 
-    // Dependências injetadas
     private ITransactionDAO transactionDAO;
-    private IAccountDAO accountDAO; // Útil para verificar se a conta pertence ao usuário
 
-    // Construtor para Injeção de Dependência
-    public StatementService(ITransactionDAO transactionDAO, IAccountDAO accountDAO) {
+    public StatementService() {
+        this.transactionDAO = new TransactionDAO();
+    }
+
+    public StatementService(ITransactionDAO transactionDAO) {
         this.transactionDAO = transactionDAO;
-        this.accountDAO = accountDAO;
     }
 
-    /**
-     * Busca o histórico completo de transações para uma conta, dentro de um período.
-     * Este método é usado para gerar o Extrato completo (PDF, CSV).
-     * @param accountId ID da conta.
-     * @param startDate Início do período.
-     * @param endDate Fim do período.
-     * @return Lista de objetos Transaction.
-     * @throws Exception Se a busca falhar.
-     */
-    public List<Transaction> getFullStatement(int accountId, Date startDate, Date endDate) throws Exception {
+    public List<Transaction> getRecentTransactionsByAccount(int accountId, int limit) {
         try {
-            // Regra de Negócio: Garantir que o período não seja demasiado longo (Ex: Max 1 ano)
-            // (Lógica de validação de datas aqui)
-
-            return transactionDAO.findByAccountId(accountId, startDate, endDate);
-
-        } catch (SQLException e) {
-            throw new Exception("Falha ao buscar extrato completo no banco de dados.", e);
+            return transactionDAO.findByAccountId(accountId, limit);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar transações da conta: " + e.getMessage());
+            return List.of();
         }
     }
 
-    /**
-     * Busca as últimas N transações para exibição rápida no Dashboard.
-     * @param accountId ID da conta.
-     * @param limit Número máximo de transações a retornar.
-     * @return Lista das transações mais recentes.
-     * @throws Exception Se a busca falhar.
-     */
-    public List<Transaction> getRecentTransactions(int accountId, int limit) throws Exception {
+    public List<Transaction> getRecentTransactionsByCustomer(int customerId, int limit) {
         try {
-            return transactionDAO.findRecentByAccountId(accountId, limit);
-        } catch (SQLException e) {
-            throw new Exception("Falha ao buscar transações recentes.", e);
+            return transactionDAO.findByCustomerId(customerId, limit);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar transações do cliente: " + e.getMessage());
+            return List.of();
         }
     }
 
-    // TODO: Adicionar um método que processa a lista de Transações e gera um objeto
-    // StatementReport (que poderia conter o saldo inicial e final do período, e a lista).
+    // NOVO: Buscar transações por conta e período
+    public List<Transaction> getTransactionsByAccountAndPeriod(int accountId, Date startDate, Date endDate) {
+        try {
+            List<Transaction> allTransactions = transactionDAO.findByAccountId(accountId, 1000); // Buscar muitas transações
+            return filterTransactionsByPeriod(allTransactions, startDate, endDate);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar transações por período: " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    // NOVO: Buscar transações por cliente e período
+    public List<Transaction> getTransactionsByCustomerAndPeriod(int customerId, Date startDate, Date endDate) {
+        try {
+            List<Transaction> allTransactions = transactionDAO.findByCustomerId(customerId, 1000); // Buscar muitas transações
+            return filterTransactionsByPeriod(allTransactions, startDate, endDate);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar transações por período: " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    // NOVO: Buscar todas as transações de um cliente (sem limite)
+    public List<Transaction> getAllTransactionsByCustomer(int customerId) {
+        try {
+            // Usar um número grande para buscar todas as transações
+            return transactionDAO.findByCustomerId(customerId, 10000);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todas as transações do cliente: " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    // NOVO: Buscar todas as transações de uma conta (sem limite)
+    public List<Transaction> getAllTransactionsByAccount(int accountId) {
+        try {
+            // Usar um número grande para buscar todas as transações
+            return transactionDAO.findByAccountId(accountId, 10000);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todas as transações da conta: " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    private List<Transaction> filterTransactionsByPeriod(List<Transaction> transactions, Date startDate, Date endDate) {
+        // Ajustar as datas para incluir todo o dia
+        Date adjustedStartDate = adjustToStartOfDay(startDate);
+        Date adjustedEndDate = adjustToEndOfDay(endDate);
+
+        return transactions.stream()
+                .filter(t -> isDateInRange(t.getTimestamp(), adjustedStartDate, adjustedEndDate))
+                .sorted((t1, t2) -> t2.getTimestamp().compareTo(t1.getTimestamp())) // Mais recentes primeiro
+                .collect(Collectors.toList());
+    }
+
+    private boolean isDateInRange(Date dateToCheck, Date startDate, Date endDate) {
+        return !dateToCheck.before(startDate) && !dateToCheck.after(endDate);
+    }
+
+    private Date adjustToStartOfDay(Date date) {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        cal.set(java.util.Calendar.MINUTE, 0);
+        cal.set(java.util.Calendar.SECOND, 0);
+        cal.set(java.util.Calendar.MILLISECOND, 0);
+        return cal.getTime();
+    }
+
+    private Date adjustToEndOfDay(Date date) {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+        cal.set(java.util.Calendar.MINUTE, 59);
+        cal.set(java.util.Calendar.SECOND, 59);
+        cal.set(java.util.Calendar.MILLISECOND, 999);
+        return cal.getTime();
+    }
+
+    // NOVO: Calcular saldo total de todas as contas do cliente
+    public double getTotalBalanceForCustomer(int customerId) {
+        try {
+            List<Transaction> recentTransactions = getRecentTransactionsByCustomer(customerId, 100);
+            if (recentTransactions.isEmpty()) {
+                return 0.0;
+            }
+
+            // Agrupar por conta e pegar o saldo mais recente de cada uma
+            return recentTransactions.stream()
+                    .collect(Collectors.groupingBy(Transaction::getSourceAccountId))
+                    .values()
+                    .stream()
+                    .mapToDouble(transactions -> {
+                        // Pegar a transação mais recente de cada conta
+                        Transaction latest = transactions.stream()
+                                .max((t1, t2) -> t1.getTimestamp().compareTo(t2.getTimestamp()))
+                                .orElse(null);
+                        return latest != null ? latest.getResultingBalance() : 0.0;
+                    })
+                    .sum();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao calcular saldo total: " + e.getMessage());
+            return 0.0;
+        }
+    }
 }

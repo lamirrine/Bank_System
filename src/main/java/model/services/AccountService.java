@@ -2,20 +2,20 @@ package model.services;
 
 import model.dao.IAccountDAO;
 import model.dao.ITransactionDAO;
+import model.dao.impl.AccountDAO;
+import model.dao.impl.TransactionDAO;
 import model.entities.Account;
 import model.entities.Transaction;
+import model.enums.AccountStatus;
 import model.enums.TransactionType;
 import model.enums.TransactionStatus;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-/**
- * Serviço responsável por toda a lógica de operações financeiras (Depósito, Levantamento, Transferência).
- * Implementa a lógica de transação atómica (atualização de saldo + registro).
- */
 public class AccountService {
 
-    // Dependências injetadas
     private IAccountDAO accountDAO;
     private ITransactionDAO transactionDAO;
     private AuthenticationService authService;
@@ -29,64 +29,159 @@ public class AccountService {
         this.bankService = bankService;
     }
 
-    /**
-     * Realiza um depósito numa conta.
-     * Não requer validação de PIN.
-     * @param accountId ID da conta destino.
-     * @param amount Valor do depósito.
-     * @return true se concluído com sucesso.
-     * @throws Exception Se a conta for inválida ou o valor for negativo.
-     */
-    public boolean deposit(int accountId, double amount) throws Exception {
-        if (amount <= 0) {
-            throw new IllegalArgumentException("Valor de depósito inválido.");
+    public AccountService() {
+        this.accountDAO = new AccountDAO();
+        this.transactionDAO = new TransactionDAO();
+        this.authService = new AuthenticationService(null, this.accountDAO);
+        this.bankService = new BankService();
+    }
+
+    public AccountService(IAccountDAO accountDAO) {
+        this.accountDAO = accountDAO;
+        this.transactionDAO = new TransactionDAO();
+        this.authService = new AuthenticationService(null, this.accountDAO);
+        this.bankService = new BankService();
+    }
+
+    public void setAuthService(AuthenticationService authService) {
+        this.authService = authService;
+    }
+
+    public void setTransactionDAO(ITransactionDAO transactionDAO) {
+        this.transactionDAO = transactionDAO;
+    }
+
+    private AuthenticationService getAuthService() {
+        if (authService == null) {
+            // Inicializa com as dependências necessárias
+            this.authService = new AuthenticationService(null, this.accountDAO);
+        }
+        return authService;
+    }
+
+    public List<Account> findAccountsByCustomerId(int customerId) {
+        try {
+            return accountDAO.findByCustomerId(customerId);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Account findAccountById(int accountId) {
+        try {
+            return accountDAO.findById(accountId);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Account findAccountByNumber(String accountNumber) {
+        try {
+            return accountDAO.findByAccountNumber(accountNumber);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean updateAccountBalance(int accountId, double newBalance) {
+        return accountDAO.updateBalance(accountId, newBalance);
+    }
+
+    public double getTotalBalance(int customerId) {
+        List<Account> accounts = findAccountsByCustomerId(customerId);
+        if (accounts == null || accounts.isEmpty()) {
+            return 0.0;
         }
 
-        // 1. Obter a conta (necessário para o saldo atual)
+        double total = 0.0;
+        for (Account account : accounts) {
+            total += account.getBalance();
+        }
+        return total;
+    }
+
+    public boolean deposit(int accountId, double amount) throws Exception {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Valor de depósito deve ser positivo.");
+        }
+
+        // Validação de valor mínimo e máximo
+        if (amount < 100.00) {
+            throw new IllegalArgumentException("Valor mínimo para depósito é MZN 100,00.");
+        }
+
+        if (amount > 50000.00) {
+            throw new IllegalArgumentException("Valor máximo por depósito é MZN 50.000,00.");
+        }
+
+        // 1. Obter a conta
         Account account = accountDAO.findById(accountId);
         if (account == null) {
             throw new Exception("Conta de destino não encontrada.");
         }
 
-        // 2. Lógica: Calcular novo saldo
+        // 2. Verificar se a conta está ativa
+        if (account.getStatus() != model.enums.AccountStatus.ATIVA) {
+            throw new Exception("Conta não está ativa. Não é possível realizar depósitos.");
+        }
+
+        // 3. Calcular novo saldo
         double newBalance = account.getBalance() + amount;
 
-        // --- TRANSAÇÃO ATÓMICA: Atualização de Saldo e Registro ---
         try {
-            // A. Atualiza o saldo no banco de dados
-            accountDAO.updateBalance(accountId, newBalance);
+            // 4. Verificar se transactionDAO está inicializado
+            if (transactionDAO == null) {
+                throw new Exception("Sistema de transações não disponível. Tente novamente.");
+            }
 
-            // B. Registra a transação
+            // 5. Atualiza o saldo no banco de dados
+            boolean balanceUpdated = accountDAO.updateBalance(accountId, newBalance);
+            if (!balanceUpdated) {
+                throw new Exception("Falha ao atualizar saldo da conta.");
+            }
+
+            // 6. Registra a transação
             Transaction transaction = new Transaction(
                     0, // ID gerado pelo BD
                     TransactionType.DEPOSITO,
                     amount,
                     new Date(),
                     TransactionStatus.CONCLUIDA,
-                    "Depósito em conta",
+                    "Depósito em conta - Disponível imediatamente",
                     accountId,
                     0, // Sem conta destino
                     newBalance,
-                    0.0
+                    0.0 // Sem taxas para depósitos
             );
-            transactionDAO.save(transaction);
+
+            boolean transactionSaved = transactionDAO.save(transaction);
+            if (!transactionSaved) {
+                // Em um sistema real, deveríamos reverter a atualização do saldo aqui
+                throw new Exception("Falha ao registrar transação.");
+            }
+
+            System.out.println("Depósito realizado: Conta " + accountId +
+                    ", Valor: " + amount + ", Novo saldo: " + newBalance);
 
             return true;
+
         } catch (SQLException e) {
-            // Em um sistema real, aqui o Service precisa garantir o ROLLBACK
-            throw new Exception("Falha crítica na operação de depósito.", e);
+            System.err.println("Erro SQL durante depósito: " + e.getMessage());
+            throw new Exception("Falha no sistema durante o depósito. Tente novamente.", e);
+        } catch (Exception e) {
+            System.err.println("Erro durante depósito: " + e.getMessage());
+            throw e; // Re-lança a exceção para tratamento superior
         }
     }
 
-    /**
-     * Realiza um levantamento (saque) de uma conta.
-     * Requer validação de PIN e verifica limites.
-     * @param accountId ID da conta de origem.
-     * @param amount Valor do levantamento.
-     * @param pin PIN de 4 dígitos para autorização.
-     * @return true se concluído com sucesso.
-     * @throws Exception Se o PIN ou saldo for inválido.
-     */
+    public Account getAccountForDeposit(int accountId) throws Exception {
+        Account account = accountDAO.findById(accountId);
+        if (account == null) {
+            throw new Exception("Conta não encontrada.");
+        }
+        return account;
+    }
+
     public boolean withdraw(int accountId, double amount, String pin) throws Exception {
         if (amount <= 0) {
             throw new IllegalArgumentException("Valor de levantamento inválido.");
@@ -97,9 +192,14 @@ public class AccountService {
             throw new Exception("Conta de origem não encontrada.");
         }
 
-        // 1. Validação de Segurança: PIN
-        if (!authService.validatePin(accountId, pin)) {
-            throw new Exception("PIN de transação inválido.");
+        // 1. Validação de Segurança: PIN - CORRIGIDO
+        try {
+            if (!getAuthService().validatePin(accountId, pin)) {
+                throw new Exception("PIN de transação inválido.");
+            }
+        } catch (model.exceptions.DomainException e) {
+            // Converte DomainException para Exception genérica com mensagem amigável
+            throw new Exception(e.getMessage());
         }
 
         // 2. Validação de Saldo e Limites
@@ -113,7 +213,6 @@ public class AccountService {
         // 3. Lógica: Calcular novo saldo
         double newBalance = account.getBalance() - amount;
 
-        // --- TRANSAÇÃO ATÓMICA ---
         try {
             accountDAO.updateBalance(accountId, newBalance);
 
@@ -129,6 +228,11 @@ public class AccountService {
                     newBalance,
                     0.0
             );
+
+            if (transactionDAO == null) {
+                throw new Exception("Sistema de transações não disponível.");
+            }
+
             transactionDAO.save(transaction);
 
             return true;
@@ -137,12 +241,11 @@ public class AccountService {
         }
     }
 
-    /**
-     * Realiza uma transferência entre duas contas.
-     * A mais complexa por envolver débito, crédito e taxas.
-     */
     public boolean transfer(int sourceAccountId, String destinationAccountNumber, double amount, String pin) throws Exception {
-        // Obter contas
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Valor de transferência inválido.");
+        }
+
         Account sourceAccount = accountDAO.findById(sourceAccountId);
         Account destinationAccount = accountDAO.findByAccountNumber(destinationAccountNumber);
 
@@ -150,19 +253,30 @@ public class AccountService {
         if (sourceAccount == null || destinationAccount == null) {
             throw new Exception("Conta de origem ou destino não encontrada.");
         }
-        if (!authService.validatePin(sourceAccountId, pin)) {
-            throw new Exception("PIN de transação inválido.");
+
+        // 1. Validação de Segurança: PIN - CORRIGIDO para usar getAuthService()
+        try {
+            if (!getAuthService().validatePin(sourceAccountId, pin)) {
+                throw new Exception("PIN de transação inválido.");
+            }
+        } catch (model.exceptions.DomainException e) {
+            throw new Exception(e.getMessage());
+        } catch (Exception e) {
+            throw new Exception("Erro ao validar PIN: " + e.getMessage());
         }
+
         if (amount > sourceAccount.getBalance()) {
             throw new Exception("Saldo insuficiente.");
         }
-        // TODO: Adicionar validação de limite diário de transferência (sourceAccount.getDailyTransferLimit())
+
+        if (amount > sourceAccount.getDailyTransferLimit()) {
+            throw new Exception("Valor excede o limite diário de transferência.");
+        }
 
         // 1. Lógica de Taxas
         double fee = 0.0;
         // Se as contas estiverem em bancos diferentes, aplica-se a taxa
         if (sourceAccount.getAgencyId() != destinationAccount.getAgencyId()) {
-            // Chamada ao BankService para obter a taxa global
             fee = amount * bankService.getTransferFeeRate();
         }
 
@@ -171,8 +285,6 @@ public class AccountService {
             throw new Exception("Saldo insuficiente para cobrir valor + taxa (" + totalDebit + " MZN).");
         }
 
-        // --- TRANSAÇÃO CRÍTICA (REQUER GESTÃO DE TRANSAÇÃO JDBC) ---
-        // Em um Service real, você iniciaria uma transação JDBC aqui.
         try {
             // DÉBITO (CONTA DE ORIGEM)
             double newSourceBalance = sourceAccount.getBalance() - totalDebit;
@@ -194,11 +306,10 @@ public class AccountService {
                     sourceAccount.getAccountId(), newDestinationBalance, 0.0);
             transactionDAO.save(creditTransaction);
 
-            // Se tudo correr bem, faria COMMIT
             return true;
         } catch (SQLException e) {
-            // Se falhar (ex: a atualização do débito falhou), você faria ROLLBACK aqui.
             throw new Exception("Falha na transferência. Tente novamente.", e);
         }
     }
+
 }

@@ -2,13 +2,10 @@ package model.services;
 
 import model.dao.ICustomerDAO;
 import model.dao.IUserDAO;
+import model.dao.impl.CustomerDAO;
 import model.entities.Customer;
 import java.sql.SQLException;
 
-/**
- * Serviço responsável pelo registo e gestão dos dados específicos do Cliente (KYC).
- * Orquestra o DAO de User e o DAO de Customer para garantir a integridade.
- */
 public class CustomerService {
 
     // Dependências injetadas
@@ -25,13 +22,26 @@ public class CustomerService {
         this.customerDAO = customerDAO;
     }
 
-    /**
-     * Regista um novo cliente no sistema (processo KYC completo).
-     * Envolve a criação de um registro na tabela User e depois na tabela Customer.
-     * @param customer O objeto Customer contendo dados pessoais e documentos.
-     * @return O objeto Customer registado (com o ID gerado).
-     * @throws Exception Se alguma validação falhar ou ocorrer erro de DB.
-     */
+    public CustomerService() {
+        this.customerDAO = new CustomerDAO();
+    }
+
+    public CustomerService(ICustomerDAO customerDAO) {
+        this.customerDAO = customerDAO;
+    }
+
+    public Customer findCustomerById(int customerId) {
+        try {
+            return customerDAO.findById(customerId);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Customer findCustomerByEmail(String email) {
+        return customerDAO.findByEmail(email);
+    }
+
     public Customer registerCustomer(Customer customer) throws Exception {
 
         // --- 1. Lógica de Validação (KYC) ---
@@ -67,11 +77,4 @@ public class CustomerService {
         }
     }
 
-    /**
-     * Busca os dados completos de um cliente (dados de User + dados de Customer).
-     */
-    public Customer findCustomerById(int customerId) throws SQLException {
-        // O CustomerDAO é responsável por buscar os dados das duas tabelas (JOIN)
-        return customerDAO.findById(customerId);
-    }
 }

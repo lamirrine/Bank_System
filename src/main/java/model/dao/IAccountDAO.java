@@ -18,8 +18,7 @@ public interface IAccountDAO {
     void save(Account account) throws SQLException;
     void updateStatus(int accountId, AccountStatus status) throws SQLException;
 
-    // CRÍTICO: Método isolado para atualização de saldo (usado em transações atómicas)
-    void updateBalance(int accountId, double newBalance) throws SQLException;
+    boolean updateBalance(int accountId, double newBalance);
 
     // CRÍTICO: Busca o hash do PIN para validação de transação
     String getPinHash(int accountId) throws SQLException;

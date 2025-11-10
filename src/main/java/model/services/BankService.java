@@ -10,21 +10,16 @@ import java.sql.SQLException;
  */
 public class BankService {
 
-    // Dependência injetada
     private IBankDAO bankDAO;
-
-    // Cache de informações para desempenho
     private Bank currentBankInfo;
+    private double transferFeeRate = 0.02;
 
-    // Construtor para Injeção de Dependência
+    public BankService(){}
+
     public BankService(IBankDAO bankDAO) {
         this.bankDAO = bankDAO;
     }
 
-    /**
-     * Carrega as informações do banco do DB ou do cache.
-     * @throws SQLException Se a leitura do DB falhar.
-     */
     private void loadBankInfo() throws SQLException {
         if (currentBankInfo == null) {
             currentBankInfo = bankDAO.getBankInfo();
@@ -37,31 +32,28 @@ public class BankService {
         }
     }
 
-    /**
-     * Retorna a taxa de comissão percentual para transferências.
-     * @return Taxa (Ex: 0.005 para 0.5%).
-     * @throws SQLException
-     */
     public double getTransferFeeRate() throws SQLException {
         loadBankInfo();
         return currentBankInfo.getTransferFeeRate();
     }
 
-    /**
-     * Retorna o telefone de suporte ao cliente.
-     * @return Número de telefone.
-     * @throws SQLException
-     */
+    public void setTransferFeeRate(double rate) {
+        this.transferFeeRate = rate;
+    }
+
+    public double getMaxWithdrawLimit() {
+        return 5000.00;
+    }
+
+    public double getMaxTransferLimit() {
+        return 10000.00;
+    }
+
     public String getSupportPhone() throws SQLException {
         loadBankInfo();
         return currentBankInfo.getSupportPhone();
     }
 
-    /**
-     * Método para atualizar as configurações (uso exclusivo para Administradores/Empregados).
-     * @param updatedBankInfo Novo objeto Bank com as configurações.
-     * @throws Exception Se a atualização falhar.
-     */
     public void updateBankConfiguration(Bank updatedBankInfo) throws Exception {
         try {
             bankDAO.updateInfo(updatedBankInfo);
