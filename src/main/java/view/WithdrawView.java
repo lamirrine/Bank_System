@@ -19,6 +19,7 @@ public class WithdrawView extends JPanel {
     private JLabel usedTodayLabel;
     private JLabel remainingLabel;
     private JLabel errorLabel;
+    private JComboBox<String> sourceAccountComboBox;
 
     public WithdrawView() {
         initializeUI();
@@ -92,6 +93,25 @@ public class WithdrawView extends JPanel {
 
         balancePanel.add(balanceTitleLabel, "growx, wrap");
         balancePanel.add(balanceLabel, "growx");
+
+        // Source account selection
+        JPanel sourceAccountPanel = new JPanel(new MigLayout("wrap, fill, insets 0", "[grow]", "[]10[]"));
+        sourceAccountPanel.setOpaque(false);
+
+        JLabel sourceAccountLabel = new JLabel("Conta de Origem:");
+        sourceAccountLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        sourceAccountLabel.setForeground(new Color(15, 23, 42));
+
+        sourceAccountComboBox = new JComboBox<>();
+        sourceAccountComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        sourceAccountComboBox.setBackground(Color.WHITE);
+        sourceAccountComboBox.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(203, 213, 225)),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+
+        sourceAccountPanel.add(sourceAccountLabel, "growx, wrap");
+        sourceAccountPanel.add(sourceAccountComboBox, "growx, h 45!");
 
         // Amount input
         JPanel amountPanel = new JPanel(new MigLayout("wrap, fill, insets 0", "[grow]", "[]10[]5[]"));
@@ -207,6 +227,7 @@ public class WithdrawView extends JPanel {
 
         panel.add(titleLabel, "growx, wrap");
         panel.add(balancePanel, "growx, wrap");
+        panel.add(sourceAccountPanel, "growx, wrap");
         panel.add(amountPanel, "growx, wrap");
         panel.add(pinPanel, "growx, wrap");
         panel.add(buttonPanel, "growx, wrap, wmax 40%, right, south");
@@ -429,10 +450,20 @@ public class WithdrawView extends JPanel {
         }
     }
 
+    public void setSourceAccounts(String[] accounts) {
+        if (sourceAccountComboBox != null) {
+            sourceAccountComboBox.removeAllItems();
+            for (String account : accounts) {
+                sourceAccountComboBox.addItem(account);
+            }
+        }
+    }
+
     // Getters
     public JTextField getAmountField() { return amountField; }
     public JPasswordField getPinField() { return pinField; }
     public JButton getCancelButton() { return cancelButton; }
     public JButton getConfirmButton() { return confirmButton; }
     public JLabel getErrorLabel() { return errorLabel; }
+    public JComboBox<String> getSourceAccountComboBox() { return sourceAccountComboBox; }
 }

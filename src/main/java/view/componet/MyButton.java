@@ -20,7 +20,7 @@ public class MyButton extends JButton {
     private Color effectColor = new Color(255, 255, 255);
 
     public MyButton() {
-        setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
         setFocusPainted(false);
         setContentAreaFilled(false);
         setBackground(Color.BLUE);

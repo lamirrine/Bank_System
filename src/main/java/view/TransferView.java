@@ -1,6 +1,8 @@
 package view;
 
 import net.miginfocom.swing.MigLayout;
+import view.componet.MyButton;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -11,8 +13,8 @@ public class TransferView extends JPanel {
     private JTextField amountField;
     private JTextField destinationAccountField;
     private JPasswordField pinField;
-    private JButton cancelButton;
-    private JButton confirmButton;
+    private MyButton cancelButton;
+    private MyButton confirmButton;
     private JPanel quickAmountsPanel;
     private JLabel dailyLimitLabel;
     private JLabel usedTodayLabel;
@@ -200,24 +202,22 @@ public class TransferView extends JPanel {
         pinPanel.add(pinField, "growx, h 45!");
 
         // Buttons
-        JPanel buttonPanel = new JPanel(new MigLayout("insets 0", "[grow][100!][100!]", "[]"));
+        JPanel buttonPanel = new JPanel(new MigLayout("insets 10", "[grow][grow]", "[]20"));
         buttonPanel.setOpaque(false);
 
-        cancelButton = new JButton("Cancelar");
+        cancelButton = new MyButton();
+        cancelButton.setText("Cancelar");
         cancelButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         cancelButton.setBackground(new Color(239, 68, 68));
         cancelButton.setForeground(Color.WHITE);
         cancelButton.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
-        cancelButton.setFocusPainted(false);
-        cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        confirmButton = new JButton("Confirmar");
+        confirmButton = new MyButton();
+        confirmButton.setText("Confirmar");
         confirmButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         confirmButton.setBackground(new Color(16, 185, 129));
         confirmButton.setForeground(Color.WHITE);
         confirmButton.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
-        confirmButton.setFocusPainted(false);
-        confirmButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         // Adicionar efeitos hover aos botões
         cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -247,8 +247,8 @@ public class TransferView extends JPanel {
         });
 
         buttonPanel.add(new JLabel(), "growx"); // spacer
-        buttonPanel.add(cancelButton, "w 100!");
-        buttonPanel.add(confirmButton, "w 100!");
+        buttonPanel.add(cancelButton, "growx");
+        buttonPanel.add(confirmButton, "growx");
 
         panel.add(titleLabel, "growx, wrap");
         panel.add(balancePanel, "growx, wrap");
@@ -256,7 +256,7 @@ public class TransferView extends JPanel {
         panel.add(destinationAccountPanel, "growx, wrap");
         panel.add(amountPanel, "growx, wrap");
         panel.add(pinPanel, "growx, wrap");
-        panel.add(buttonPanel, "growx");
+        panel.add(buttonPanel, "growx, wrap, wmax 40%, right, south");
 
         return panel;
     }
@@ -286,7 +286,8 @@ public class TransferView extends JPanel {
     }
 
     private JButton createAmountButton(String amount) {
-        JButton button = new JButton(amount);
+        MyButton button = new MyButton();
+        button.setText(amount);
         button.setFont(new Font("Segoe UI", Font.BOLD, 14));
         button.setBackground(Color.WHITE);
         button.setForeground(new Color(59, 130, 246));
@@ -294,8 +295,6 @@ public class TransferView extends JPanel {
                 BorderFactory.createLineBorder(new Color(59, 130, 246)),
                 BorderFactory.createEmptyBorder(10, 5, 10, 5)
         ));
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         button.addActionListener(e -> {
             try {
@@ -484,6 +483,7 @@ public class TransferView extends JPanel {
             for (String account : accounts) {
                 sourceAccountComboBox.addItem(account);
             }
+
         }
     }
 

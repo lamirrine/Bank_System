@@ -53,6 +53,14 @@ public class WithdrawController {
                     processWithdrawal();
                 });
             }
+
+            // Listener para mudança de conta origem
+            if (view.getSourceAccountComboBox() != null) {
+                view.getSourceAccountComboBox().addActionListener(e -> {
+                    updateSelectedAccount();
+                    updateContinueButtonState();
+                });
+            }
         } catch (Exception e) {
             System.err.println("Erro ao configurar event listeners: " + e.getMessage());
         }
@@ -88,6 +96,18 @@ public class WithdrawController {
     private void updateUI() {
         try {
             if (customerAccounts != null && !customerAccounts.isEmpty()) {
+                // Configurar combobox de contas origem
+                String[] accountDisplay = new String[customerAccounts.size()];
+                for (int i = 0; i < customerAccounts.size(); i++) {
+                    Account account = customerAccounts.get(i);
+                    String accountType = account.getAccountType() != null ?
+                            account.getAccountType().toString() : "CORRENTE";
+                    String typeDisplay = accountType.equals("CORRENTE") ? "Conta Corrente" : "Conta Poupança";
+                    accountDisplay[i] = String.format("%s - %s (MZN %,.2f)",
+                            typeDisplay, account.getAccountNumber(), account.getBalance());
+                }
+                view.setSourceAccounts(accountDisplay);
+
                 // Usar a primeira conta como padrão
                 selectedAccount = customerAccounts.get(0);
                 double balance = selectedAccount.getBalance();
@@ -98,6 +118,21 @@ public class WithdrawController {
             }
         } catch (Exception e) {
             System.err.println("Erro ao atualizar UI: " + e.getMessage());
+        }
+
+
+    }
+
+    private void updateSelectedAccount() {
+        try {
+            int selectedIndex = view.getSourceAccountComboBox().getSelectedIndex();
+            if (selectedIndex >= 0 && customerAccounts != null && selectedIndex < customerAccounts.size()) {
+                selectedAccount = customerAccounts.get(selectedIndex);
+                view.setBalance(selectedAccount.getBalance());
+                view.setLimits(selectedAccount.getDailyWithdrawLimit(), 0.0, selectedAccount.getDailyWithdrawLimit());
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao atualizar conta selecionada: " + e.getMessage());
         }
     }
 

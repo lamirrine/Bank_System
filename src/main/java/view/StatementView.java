@@ -1,6 +1,8 @@
 package view;
 
 import net.miginfocom.swing.MigLayout;
+import view.componet.MyButton;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -12,9 +14,9 @@ public class StatementView extends JPanel {
     private JComboBox<String> periodComboBox;
     private JDateChooser startDateChooser;
     private JDateChooser endDateChooser;
-    private JButton searchButton;
-    private JButton generatePdfButton;
-    private JButton cancelButton;
+    private MyButton searchButton;
+    private MyButton generatePdfButton;
+    private MyButton cancelButton;
     private JTable transactionsTable;
     private JLabel totalLabel;
     private JProgressBar progressBar;
@@ -37,7 +39,7 @@ public class StatementView extends JPanel {
     }
 
     private JPanel createHeader() {
-        JPanel header = new JPanel(new MigLayout("fill, insets 0 0 15 0", "[grow]", "[]"));
+        JPanel header = new JPanel(new MigLayout("fill, insets 15 15 15 0", "[grow]", "[]"));
         header.setBackground(Color.WHITE);
         header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(226, 232, 240)));
 
@@ -72,14 +74,14 @@ public class StatementView extends JPanel {
 
     private JPanel createFiltersSection() {
         JPanel panel = createCard();
-        panel.setLayout(new MigLayout("wrap, fill, insets 25", "[grow]", "[]15[]"));
+        panel.setLayout(new MigLayout("wrap, fill, insets 20", "[grow][]", "[]15[]"));
 
         JLabel titleLabel = new JLabel("Filtros do Extrato");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
         titleLabel.setForeground(new Color(15, 23, 42));
 
         // Filters content
-        JPanel filtersPanel = new JPanel(new MigLayout("fill, insets 0", "[][][grow][grow][100!]", "[]"));
+        JPanel filtersPanel = new JPanel(new MigLayout(" fill, insets 0", "[]10[]60[]10[]200[]10[grow]30[]10[grow]30[grow]", "[]"));
         filtersPanel.setOpaque(false);
 
         // Account selection
@@ -104,23 +106,21 @@ public class StatementView extends JPanel {
         endDateChooser = createDateChooser();
 
         // Search button
-        searchButton = new JButton("Buscar");
-        searchButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        searchButton = new MyButton();
+        searchButton.setText("Buscar");
+        searchButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
         searchButton.setBackground(new Color(59, 130, 246));
-        searchButton.setForeground(Color.WHITE);
         searchButton.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
-        searchButton.setFocusPainted(false);
-        searchButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         filtersPanel.add(accountLabel);
-        filtersPanel.add(accountComboBox, "w 150!");
+        filtersPanel.add(accountComboBox, "w 260!");
         filtersPanel.add(periodLabel);
-        filtersPanel.add(periodComboBox, "w 150!");
+        filtersPanel.add(periodComboBox, "w 200!");
         filtersPanel.add(startDateLabel);
-        filtersPanel.add(startDateChooser, "w 120!");
+        filtersPanel.add(startDateChooser, "growx");
         filtersPanel.add(endDateLabel);
-        filtersPanel.add(endDateChooser, "w 120!");
-        filtersPanel.add(searchButton, "span, top, w 100!");
+        filtersPanel.add(endDateChooser, "growx");
+        filtersPanel.add(searchButton, "span, top, growx");
 
         panel.add(titleLabel, "growx, wrap");
         panel.add(filtersPanel, "growx");
@@ -142,7 +142,7 @@ public class StatementView extends JPanel {
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         JLabel titleLabel = new JLabel("Transações");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
         titleLabel.setForeground(new Color(15, 23, 42));
 
         // Create table with sample data
@@ -174,7 +174,7 @@ public class StatementView extends JPanel {
 
     private JPanel createSummarySection() {
         JPanel panel = createCard();
-        panel.setLayout(new MigLayout("fill, insets 25", "[grow][200!][200!]", "[]"));
+        panel.setLayout(new MigLayout("fill, insets 20", "[grow][200!][grow]15", "[]"));
 
         // Total label
         JPanel totalPanel = new JPanel(new MigLayout("insets 0", "[grow]", "[]5[]"));
@@ -207,24 +207,18 @@ public class StatementView extends JPanel {
         progressPanel.add(statusLabel, "growx");
 
         // Buttons
-        JPanel buttonPanel = new JPanel(new MigLayout("insets 0", "[grow][100!][100!]", "[]"));
+        JPanel buttonPanel = new JPanel(new MigLayout("insets 5", "[grow]10[grow]10", "[]"));
         buttonPanel.setOpaque(false);
 
-        cancelButton = new JButton("Voltar");
+        cancelButton = new MyButton();
+        cancelButton.setText("  Voltar  ");
         cancelButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         cancelButton.setBackground(new Color(107, 114, 128));
-        cancelButton.setForeground(Color.WHITE);
-        cancelButton.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
-        cancelButton.setFocusPainted(false);
-        cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        generatePdfButton = new JButton("Gerar PDF");
+        generatePdfButton = new MyButton();
+        generatePdfButton.setText("Gerar PDF");
         generatePdfButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         generatePdfButton.setBackground(new Color(16, 185, 129));
-        generatePdfButton.setForeground(Color.WHITE);
-        generatePdfButton.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
-        generatePdfButton.setFocusPainted(false);
-        generatePdfButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         // Adicionar efeitos hover aos botões
         cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -254,12 +248,12 @@ public class StatementView extends JPanel {
         });
 
         buttonPanel.add(progressPanel, "growx");
-        buttonPanel.add(cancelButton, "w 100!");
-        buttonPanel.add(generatePdfButton, "w 100!");
+        buttonPanel.add(cancelButton, "growx");
+        buttonPanel.add(generatePdfButton, "growx");
 
         panel.add(totalPanel, "grow");
         panel.add(new JLabel(), "grow"); // spacer
-        panel.add(buttonPanel, "growx");
+        panel.add(buttonPanel, "growx, wmax 40%, right");
 
         return panel;
     }

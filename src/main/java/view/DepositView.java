@@ -191,13 +191,11 @@ public class DepositView extends JPanel {
         cancelButton.setText("Cancelar");
         cancelButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
         cancelButton.setBackground(new Color(239, 68, 68));
-        cancelButton.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
         continueButton = new MyButton();
         continueButton.setText("Confirmar");
         continueButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
         continueButton.setBackground(new Color(116, 185, 249));
-        continueButton.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
         // Adicionar efeitos hover aos botões
         cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
