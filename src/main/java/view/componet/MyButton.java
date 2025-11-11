@@ -1,30 +1,16 @@
-package view.login.fiels;
+package view.componet;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import javax.swing.JButton;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.animation.timing.TimingTargetAdapter;
 
-public class Button extends JButton {
-
-    public Color getEffectColor() {
-        return effectColor;
-    }
-
-    public void setEffectColor(Color effectColor) {
-        this.effectColor = effectColor;
-    }
+public class MyButton extends JButton {
 
     private Animator animator;
     private int targetSize;
@@ -33,11 +19,12 @@ public class Button extends JButton {
     private float alpha;
     private Color effectColor = new Color(255, 255, 255);
 
-    public Button() {
-        setContentAreaFilled(false);
+    public MyButton() {
+        setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
         setFocusPainted(false);
-        setBorder(new EmptyBorder(5, 0, 5, 0));
-        setBackground(Color.WHITE);
+        setContentAreaFilled(false);
+        setBackground(Color.BLUE);
+        setForeground(Color.WHITE);
         setCursor(new Cursor(Cursor.HAND_CURSOR));
         addMouseListener(new MouseAdapter() {
             @Override
@@ -72,11 +59,12 @@ public class Button extends JButton {
     protected void paintComponent(Graphics grphcs) {
         int width = getWidth();
         int height = getHeight();
+        int cornerRadius = 20;
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = img.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(getBackground());
-        g2.fillRoundRect(0, 0, width, height, height, height);
+        g2.fillRoundRect(0, 0, width, height, cornerRadius, cornerRadius);
         if (pressedPoint != null) {
             g2.setColor(effectColor);
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, alpha));

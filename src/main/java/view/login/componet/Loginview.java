@@ -7,12 +7,12 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-import java.util.Objects;
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.animation.timing.TimingTargetAdapter;
+import view.componet.MyButton;
 import view.login.fiels.Button;
 import view.login.fiels.MyPasswordField;
 import view.login.fiels.MyTextField;
@@ -31,8 +31,8 @@ public class Loginview extends JFrame {
     private UserDAO userDAO = new UserDAO();
     private MyTextField emailField;
     private MyPasswordField passwordField;
-    private view.login.fiels.Button loginButton;
-    private view.login.fiels.Button sigupButton;
+    private Button loginButton;
+    private Button sigupButton;
     private JPanel login = new JPanel();
     private JPanel register = new JPanel();
 
@@ -138,7 +138,7 @@ public class Loginview extends JFrame {
         cmdForget.setCursor(new Cursor(Cursor.HAND_CURSOR));
         login.add(cmdForget);
 
-        loginButton = new view.login.fiels.Button();
+        loginButton = new Button();
         loginButton.setBackground(new Color(35, 60, 121));
         loginButton.setForeground(new Color(250, 250, 250));
         loginButton.setText("SIGN IN");

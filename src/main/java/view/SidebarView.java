@@ -1,11 +1,13 @@
 package view;
 
 import net.miginfocom.swing.MigLayout;
+import view.componet.MyButton;
 import javax.swing.*;
 import java.awt.*;
 
 public class SidebarView extends JPanel {
-    private JButton homeBtn, depositBtn, withdrawBtn, transferBtn, statementBtn, logoutBtn;
+    private JButton homeBtn, depositBtn, withdrawBtn, transferBtn, statementBtn;
+    private MyButton logoutBtn;
     private JLabel welcomeLabel;
     private JLabel accountNumberLabel;
     private JButton activeButton;
@@ -192,14 +194,10 @@ public class SidebarView extends JPanel {
         userInfoPanel.add(avatarPanel, "w 50!, h 50!");
         userInfoPanel.add(detailsPanel, "grow");
 
-        // Logout button
-        logoutBtn = new JButton("Sair da Conta");
-        logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        logoutBtn = new MyButton();
         logoutBtn.setBackground(new Color(239, 68, 68));
-        logoutBtn.setForeground(Color.WHITE);
-        logoutBtn.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
-        logoutBtn.setFocusPainted(false);
-        logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        logoutBtn.setForeground(new Color(250, 250, 250));
+        logoutBtn.setText("SAIR DA CONTA");
 
         userPanel.add(userInfoPanel, "growx");
         userPanel.add(logoutBtn, "growx, h 40!");
@@ -207,21 +205,17 @@ public class SidebarView extends JPanel {
         return userPanel;
     }
 
-    // MÉTODO MELHORADO: Atualizar o botão ativo
     public void setActiveButton(JButton button) {
         if (activeButton != null && activeButton != button) {
-            // Redesenha o botão anterior para estado normal
             activeButton.repaint();
         }
 
         activeButton = button;
         if (activeButton != null) {
-            // Redesenha o novo botão ativo
             activeButton.repaint();
         }
     }
 
-    // MÉTODO ESPECÍFICO para setar o Home como ativo
     public void setHomeActive() {
         setActiveButton(homeBtn);
     }
@@ -234,7 +228,6 @@ public class SidebarView extends JPanel {
     public JButton getStatementBtn() { return statementBtn; }
     public JButton getLogoutBtn() { return logoutBtn; }
 
-    // Método para atualizar informações do usuário
     public void setUserInfo(String name, String accountNumber) {
         if (welcomeLabel != null) {
             welcomeLabel.setText(name);
@@ -257,7 +250,6 @@ public class SidebarView extends JPanel {
         }
     }
 
-    // Método para atualizar o avatar
     private void updateAvatarLabel(String initials) {
         try {
             JPanel userPanel = (JPanel) getComponent(2);

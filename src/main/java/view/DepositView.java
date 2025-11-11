@@ -1,6 +1,8 @@
 package view;
 
 import net.miginfocom.swing.MigLayout;
+import view.componet.MyButton;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -9,8 +11,8 @@ import java.awt.*;
 public class DepositView extends JPanel {
     private JComboBox<String> accountComboBox;
     private JTextField amountField;
-    private JButton cancelButton;
-    private JButton continueButton;
+    private MyButton cancelButton;
+    private MyButton continueButton;
     private ButtonGroup methodGroup;
     private JRadioButton transferRadio;
     private JRadioButton betweenAccountsRadio;
@@ -130,7 +132,7 @@ public class DepositView extends JPanel {
         panel.setLayout(new MigLayout("wrap, fill, insets 25", "[grow]", "[]15[]15[]"));
 
         JLabel titleLabel = new JLabel("Conta Destino");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
         titleLabel.setForeground(new Color(15, 23, 42));
 
         // Account selection
@@ -138,11 +140,11 @@ public class DepositView extends JPanel {
         accountPanel.setOpaque(false);
 
         JLabel accountLabel = new JLabel("Selecione a conta:");
-        accountLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        accountLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         accountLabel.setForeground(new Color(15, 23, 42));
 
         accountComboBox = new JComboBox<>(new String[]{"Conta Corrente - 123456", "Conta Poupança - 789012"});
-        accountComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        accountComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         accountComboBox.setBackground(Color.WHITE);
         accountComboBox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(203, 213, 225)),
@@ -150,14 +152,14 @@ public class DepositView extends JPanel {
         ));
 
         accountPanel.add(accountLabel, "growx, wrap");
-        accountPanel.add(accountComboBox, "growx, h 45!");
+        accountPanel.add(accountComboBox, "growx, h 60!");
 
         // Deposit method
         JPanel methodPanel = new JPanel(new MigLayout("wrap, fill, insets 0", "[grow]", "[]10[]"));
         methodPanel.setOpaque(false);
 
         JLabel methodLabel = new JLabel("Método de Depósito:");
-        methodLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        methodLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         methodLabel.setForeground(new Color(15, 23, 42));
 
         methodGroup = new ButtonGroup();
@@ -168,8 +170,8 @@ public class DepositView extends JPanel {
         methodGroup.add(transferRadio);
         methodGroup.add(betweenAccountsRadio);
 
-        transferRadio.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        betweenAccountsRadio.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        transferRadio.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        betweenAccountsRadio.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         transferRadio.setBackground(Color.WHITE);
         betweenAccountsRadio.setBackground(Color.WHITE);
 
@@ -182,24 +184,20 @@ public class DepositView extends JPanel {
         methodPanel.add(radioPanel, "growx");
 
         // Buttons
-        JPanel buttonPanel = new JPanel(new MigLayout("insets 0", "[grow][100!][100!]", "[]"));
+        JPanel buttonPanel = new JPanel(new MigLayout("insets 0", "[grow]30[grow]30", "[]25[]"));
         buttonPanel.setOpaque(false);
 
-        cancelButton = new JButton("Cancelar");
-        cancelButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        cancelButton = new MyButton();
+        cancelButton.setText("Cancelar");
+        cancelButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
         cancelButton.setBackground(new Color(239, 68, 68));
-        cancelButton.setForeground(Color.WHITE);
-        cancelButton.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
-        cancelButton.setFocusPainted(false);
-        cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        cancelButton.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
-        continueButton = new JButton("Continuar");
-        continueButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        continueButton.setBackground(new Color(16, 185, 129));
-        continueButton.setForeground(Color.WHITE);
-        continueButton.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
-        continueButton.setFocusPainted(false);
-        continueButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        continueButton = new MyButton();
+        continueButton.setText("Confirmar");
+        continueButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        continueButton.setBackground(new Color(116, 185, 249));
+        continueButton.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
         // Adicionar efeitos hover aos botões
         cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -229,27 +227,27 @@ public class DepositView extends JPanel {
         });
 
         buttonPanel.add(new JLabel(), "growx"); // spacer
-        buttonPanel.add(cancelButton, "w 100!");
-        buttonPanel.add(continueButton, "w 100!");
+        buttonPanel.add(cancelButton, "growx");
+        buttonPanel.add(continueButton, "growx");
 
         panel.add(titleLabel, "growx, wrap");
         panel.add(accountPanel, "growx, wrap");
         panel.add(methodPanel, "growx, wrap");
-        panel.add(buttonPanel, "growx");
+        panel.add(buttonPanel, "growx, wrap, wmax 40%, right, south");
 
         return panel;
     }
 
     private JPanel createQuickDepositSection() {
         JPanel panel = createCard();
-        panel.setLayout(new MigLayout("wrap, fill, insets 25", "[grow]", "[]15[]"));
+        panel.setLayout(new MigLayout("wrap, fill, insets 0", "15[grow]15", "10[]10[]"));
 
         JLabel titleLabel = new JLabel("Depósito Rápido");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         titleLabel.setForeground(new Color(15, 23, 42));
 
         JLabel subtitleLabel = new JLabel("Valores sugeridos:");
-        subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         subtitleLabel.setForeground(new Color(107, 114, 128));
 
         quickAmountsPanel = new JPanel(new MigLayout("insets 0", "[grow][grow][grow][grow]", "[]"));
@@ -270,16 +268,15 @@ public class DepositView extends JPanel {
     }
 
     private JButton createAmountButton(String amount) {
-        JButton button = new JButton(amount);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        MyButton button = new MyButton();
+        button.setText(amount);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 16));
         button.setBackground(Color.WHITE);
         button.setForeground(new Color(59, 130, 246));
         button.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(59, 130, 246)),
                 BorderFactory.createEmptyBorder(10, 5, 10, 5)
         ));
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         button.addActionListener(e -> {
             try {
@@ -307,7 +304,7 @@ public class DepositView extends JPanel {
 
     private JPanel createDepositInfoSection() {
         JPanel panel = createCard();
-        panel.setLayout(new MigLayout("wrap, fill, insets 25", "[grow]", "[]15[]15[]"));
+        panel.setLayout(new MigLayout("wrap, fill, insets 20", "[grow]25[grow]", "[]15[]15[]"));
 
         JLabel titleLabel = new JLabel("Informações do Depósito");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
@@ -315,26 +312,19 @@ public class DepositView extends JPanel {
 
         // Information
         JPanel infoPanel = createInfoItem(
-                "Informação",
-                "Depósitos em dinheiro não possuem taxas"
+                "Valor Minimo",
+                "MZN 100,00 por depósito"
         );
 
         // Limits
         JPanel limitsPanel = createInfoItem(
-                "Limites",
-                "Máximo por depósito: MZN 50.000,00"
-        );
-
-        // Availability
-        JPanel availabilityPanel = createInfoItem(
-                "Disponibilidade",
-                "Valor disponível imediatamente"
+                "Valor Máximo",
+                "MZN 50.000,00 por depósito"
         );
 
         panel.add(titleLabel, "growx, wrap");
-        panel.add(infoPanel, "growx, wrap");
+        panel.add(infoPanel, "growx, wrap, wmin 80");
         panel.add(limitsPanel, "growx, wrap");
-        panel.add(availabilityPanel, "growx");
 
         return panel;
     }
