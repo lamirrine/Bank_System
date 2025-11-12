@@ -1,6 +1,5 @@
 package view.login.componet;
 
-import model.dao.impl.UserDAO;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,11 +7,14 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import javax.swing.*;
+
+import controller.AuthenticationController;
+import model.dao.IUserDAO;
+import model.services.AuthenticationService;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.animation.timing.TimingTargetAdapter;
-import view.componet.MyButton;
 import view.login.fiels.Button;
 import view.login.fiels.MyPasswordField;
 import view.login.fiels.MyTextField;
@@ -28,14 +30,14 @@ public class Loginview extends JFrame {
     private final double coverSize = 40;
     private final double loginSize = 60;
     private JLayeredPane bg;
-    private UserDAO userDAO = new UserDAO();
     private MyTextField emailField;
+    private MyTextField txtFirstName, txtLastName, txtEmail, txtBi, txtPassport, txtNuit, txtPhone, txtAddress;
     private MyPasswordField passwordField;
+    private MyPasswordField txtPassword;
     private Button loginButton;
     private Button sigupButton;
     private JPanel login = new JPanel();
     private JPanel register = new JPanel();
-
     private JLayeredPane logReg;
 
     public Loginview() {
@@ -152,50 +154,51 @@ public class Loginview extends JFrame {
         label.setForeground(new Color(30, 40, 112));
         register.add(label);
 
-        MyTextField txtUser = new MyTextField();
-        txtUser.setPrefixIcon(new ImageIcon(("/main/java/view/icon/user.png")));
-        txtUser.setHint("Nome");
-        register.add(txtUser, "w 60%");
+        // Campos com referências diretas
+        txtFirstName = new MyTextField();
+        txtFirstName.setPrefixIcon(new ImageIcon(("/main/java/view/icon/user.png")));
+        txtFirstName.setHint("Nome");
+        register.add(txtFirstName, "w 60%");
 
-        MyTextField txtLast = new MyTextField();
-        txtLast.setPrefixIcon(new ImageIcon(("/main/java/view/icon/user.png")));
-        txtLast.setHint("Apelido");
-        register.add(txtLast, "w 60%");
+        txtLastName = new MyTextField();
+        txtLastName.setPrefixIcon(new ImageIcon(("/main/java/view/icon/user.png")));
+        txtLastName.setHint("Apelido");
+        register.add(txtLastName, "w 60%");
 
-        MyTextField txtEmail = new MyTextField();
+        txtEmail = new MyTextField();
         txtEmail.setPrefixIcon(new ImageIcon("/main/java/view/icon/mail.png"));
         txtEmail.setHint("Email");
         register.add(txtEmail, "w 60%");
 
-        MyPasswordField txtPass = new MyPasswordField();
-        txtPass.setPrefixIcon(new ImageIcon(("/main/java/view/icon/pass.png")));
-        txtPass.setHint("Password");
-        register.add(txtPass, "w 60%");
+        txtPassword = new MyPasswordField();
+        txtPassword.setPrefixIcon(new ImageIcon(("/main/java/view/icon/pass.png")));
+        txtPassword.setHint("Password");
+        register.add(txtPassword, "w 60%");
 
-        MyTextField txtBi = new MyTextField();
+        txtBi = new MyTextField();
         txtBi.setPrefixIcon(new ImageIcon(("/main/java/view/icon/pass.png")));
         txtBi.setHint("BI");
         register.add(txtBi, "w 60%");
 
-        MyTextField txtPassport = new MyTextField();
+        txtPassport = new MyTextField();
         txtPassport.setPrefixIcon(new ImageIcon(("/main/java/view/icon/pass.png")));
         txtPassport.setHint("Passaporte (ESTRAGEIROS)");
         register.add(txtPassport, "w 60%");
 
-        MyTextField txtNuit = new MyTextField();
+        txtNuit = new MyTextField();
         txtNuit.setPrefixIcon(new ImageIcon(("/main/java/view/icon/pass.png")));
         txtNuit.setHint("Nuit");
         register.add(txtNuit, "w 60%");
 
-        MyTextField txtPhone = new MyTextField();
+        txtPhone = new MyTextField();
         txtPhone.setPrefixIcon(new ImageIcon(("/main/java/view/icon/mail.png")));
         txtPhone.setHint("Contacto(+258)");
         register.add(txtPhone, "w 60%");
 
-        MyTextField txtAdress = new MyTextField();
-        txtAdress.setPrefixIcon(new ImageIcon(("/main/java/view/icon/mail.png")));
-        txtAdress.setHint("Endereco");
-        register.add(txtAdress, "w 60%");
+        txtAddress = new MyTextField();
+        txtAddress.setPrefixIcon(new ImageIcon(("/main/java/view/icon/mail.png")));
+        txtAddress.setHint("Endereco");
+        register.add(txtAddress, "w 60%");
 
         sigupButton = new Button();
         sigupButton.setBackground(new Color(30, 44, 121));
@@ -204,7 +207,18 @@ public class Loginview extends JFrame {
         register.add(sigupButton, "w 40%, h 40");
     }
 
-    // MÉTODOS PÚBLICOS PARA ACESSAR OS CAMPOS
+    public void clearRegisterFields() {
+        txtFirstName.setText("");
+        txtLastName.setText("");
+        txtEmail.setText("");
+        txtPassword.setText("");
+        txtBi.setText("");
+        txtPassport.setText("");
+        txtNuit.setText("");
+        txtPhone.setText("");
+        txtAddress.setText("");
+    }
+
     public String getEmail() {
         return emailField.getText().trim();
     }
@@ -212,6 +226,43 @@ public class Loginview extends JFrame {
     public String getPassword() {
         return new String(passwordField.getPassword());
     }
+
+    public String getRegisterFirstName() {
+        return txtFirstName.getText().trim();
+    }
+
+    public String getRegisterLastName() {
+        return txtLastName.getText().trim();
+    }
+
+    public String getRegisterEmail() {
+        return txtEmail.getText().trim();
+    }
+
+    public String getRegisterPassword() {
+        return new String(txtPassword.getPassword());
+    }
+
+    public String getRegisterBiNumber() {
+        return txtBi.getText().trim();
+    }
+
+    public String getRegisterPassportNumber() {
+        return txtPassport.getText().trim();
+    }
+
+    public String getRegisterNuit() {
+        return txtNuit.getText().trim();
+    }
+
+    public String getRegisterPhone() {
+        return txtPhone.getText().trim();
+    }
+
+    public String getRegisterAddress() {
+        return txtAddress.getText().trim();
+    }
+
 
     // LISTENERS
     public void addLoginListener(ActionListener listener) {

@@ -12,10 +12,6 @@ import java.util.List;
 
 public class AccountDAO implements IAccountDAO {
 
-    private static final String UPDATE_BALANCE = "UPDATE account SET balance = ? WHERE account_id = ?";
-
-    private static final String GET_PIN_HASH = "SELECT transaction_pin_hash FROM account WHERE account_id = ?";
-
     @Override
     public String getPinHash(int accountId) throws SQLException {
         String sql = "SELECT transaction_pin_hash FROM account WHERE account_id = ?";
@@ -55,7 +51,56 @@ public class AccountDAO implements IAccountDAO {
 
     @Override
     public void save(Account account) throws SQLException {
+        String sql = "INSERT INTO account (account_number, account_type, balance, open_date, close_date, status, owner_customer_id, agency_id, daily_withdraw_limit, daily_transfer_limit, transaction_pin_hash) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, account.getAccountNumber());
+            stmt.setString(2, account.getAccountType().toString());
+            stmt.setDouble(3, account.getBalance());
+            stmt.setTimestamp(4, new java.sql.Timestamp(account.getOpenDate().getTime()));
+
+            if (account.getCloseDate() != null) {
+                stmt.setTimestamp(5, new java.sql.Timestamp(account.getCloseDate().getTime()));
+            } else {
+                stmt.setNull(5, java.sql.Types.TIMESTAMP);
+            }
+
+            stmt.setString(6, account.getStatus().toString());
+            stmt.setInt(7, account.getOwnerCustomerId());
+            stmt.setInt(8, account.getAgencyId());
+            stmt.setDouble(9, account.getDailyWithdrawLimit());
+            stmt.setDouble(10, account.getDailyTransferLimit());
+            stmt.setString(11, account.getTransactionPinHash());
+
+            int affectedRows = stmt.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new SQLException("Falha ao criar conta, nenhuma linha afetada.");
+            }
+
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    account.setAccountId(generatedKeys.getInt(1));
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean updatePin(int accountId, String newPinHash) throws SQLException {
+        String sql = "UPDATE account SET transaction_pin_hash = ? WHERE account_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, newPinHash);
+            stmt.setInt(2, accountId);
+
+            return stmt.executeUpdate() > 0;
+        }
     }
 
     @Override

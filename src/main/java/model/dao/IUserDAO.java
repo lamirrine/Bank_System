@@ -4,6 +4,8 @@ import model.entities.User;
 import java.sql.SQLException;
 
 public interface IUserDAO {
+    boolean updatePassword(int userId, String newPasswordHash) throws SQLException;
+
     // Busca por Chave Primária
     User findById(int userId) throws SQLException;
 

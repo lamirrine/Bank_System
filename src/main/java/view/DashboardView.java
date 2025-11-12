@@ -10,7 +10,8 @@ public class DashboardView extends JFrame {
     private DepositView depositView;
     private WithdrawView withdrawView;
     private TransferView transferView;
-    private StatementView statementView; // NOVO
+    private StatementView statementView;
+    private ProfileView profileView;
     private JPanel mainContentPanel;
     private CardLayout cardLayout;
 
@@ -19,7 +20,7 @@ public class DashboardView extends JFrame {
     }
 
     private void initializeUI() {
-        setTitle("Banco Digital - Dashboard");
+        setTitle("HomePage");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setMinimumSize(new Dimension(1200, 700));
@@ -51,10 +52,14 @@ public class DashboardView extends JFrame {
         transferView = new TransferView();
         mainContentPanel.add(transferView, "TRANSFER");
 
-        // Statement view - NOVO
+        // Statement view
         statementView = new StatementView();
         mainContentPanel.add(statementView, "STATEMENT");
+        add(mainContentPanel, "grow");
 
+        // Profile view
+        profileView = new ProfileView();
+        mainContentPanel.add(profileView, "PROFILE");
         add(mainContentPanel, "grow");
     }
 
@@ -75,8 +80,12 @@ public class DashboardView extends JFrame {
         cardLayout.show(mainContentPanel, "TRANSFER");
     }
 
-    public void showStatementView() { // NOVO
+    public void showStatementView() {
         cardLayout.show(mainContentPanel, "STATEMENT");
+    }
+
+    public void showProfileView() {
+        cardLayout.show(mainContentPanel, "PROFILE");
     }
 
     // Getters
@@ -85,7 +94,8 @@ public class DashboardView extends JFrame {
     public DepositView getDepositView() { return depositView; }
     public WithdrawView getWithdrawView() { return withdrawView; }
     public TransferView getTransferView() { return transferView; }
-    public StatementView getStatementView() { return statementView; } // NOVO
+    public StatementView getStatementView() { return statementView; }
+    public ProfileView getProfileView() { return profileView; }
 
     // Métodos para atualizar dados
     public void setBalance(double balance) {

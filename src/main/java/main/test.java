@@ -19,9 +19,9 @@ public class test {
                 AccountService ac = new AccountService();
                 StatementService ss = new StatementService();
                 CustomerService cs = new CustomerService();
-                //Loginview s = new Loginview();
-                DashboardView s = new DashboardView();
-                DashboardController d = new DashboardController(s,ac,ss,cs,c);
+                Loginview s = new Loginview();
+               // DashboardView s = new DashboardView();
+               // DashboardController d = new DashboardController(s,ac,ss,cs,c);
                 s.setVisible(true);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null,

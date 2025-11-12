@@ -16,6 +16,10 @@ public interface IAccountDAO {
 
     // Persistência e Operações CRÍTICAS
     void save(Account account) throws SQLException;
+
+    // No AccountDAO.java, adicione este método:
+    boolean updatePin(int accountId, String newPinHash) throws SQLException;
+
     void updateStatus(int accountId, AccountStatus status) throws SQLException;
 
     boolean updateBalance(int accountId, double newBalance);

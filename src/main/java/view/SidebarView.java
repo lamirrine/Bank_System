@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class SidebarView extends JPanel {
-    private JButton homeBtn, depositBtn, withdrawBtn, transferBtn, statementBtn;
+    private JButton homeBtn, depositBtn, withdrawBtn, transferBtn, statementBtn, profileBtn;
     private MyButton logoutBtn;
     private JLabel welcomeLabel;
     private JLabel accountNumberLabel;
@@ -23,7 +23,7 @@ public class SidebarView extends JPanel {
         setPreferredSize(new Dimension(280, 800));
 
         // Logo section
-        add(createLogoPanel(), "growx, h 120!");
+        add(createLogoPanel(), "growx, h 100!");
 
         // Menu items
         add(createMenuPanel(), "growx");
@@ -40,7 +40,7 @@ public class SidebarView extends JPanel {
         logoLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         logoLabel.setForeground(Color.WHITE);
 
-        logoPanel.add(logoLabel, "align center, gaptop 40");
+        logoPanel.add(logoLabel, "align center, gaptop 15");
         return logoPanel;
     }
 
@@ -48,14 +48,14 @@ public class SidebarView extends JPanel {
         JPanel menuPanel = new JPanel(new MigLayout("wrap, fill, insets 20 20 20 20", "[grow]", "[]25[]25[]25[]25[]25[]"));
         menuPanel.setBackground(new Color(12, 16, 45));
 
-        String[] menuItems = {"🏠 Início", "💰 Depósito", "💸 Levantamento", "🔄 Transferência", "📊 Extrato", "👤 Perfil"};
+        String[] menuItems = {"🏠 Início", "💰 Depósito", "\uD83E\uDE99 Levantamento", "\uD83D\uDCB1 Transferência","📊 Extrato", "👤 Perfil"};
         Color[] menuColors = {
-                new Color(59, 130, 246),  // Azul para Início
-                new Color(16, 185, 129),  // Verde para Depósito
-                new Color(239, 68, 68),   // Vermelho para Levantamento
-                new Color(168, 85, 247),  // Roxo para Transferência
-                new Color(245, 158, 11),  // Laranja para Extrato
-                new Color(14, 165, 233)   // Azul claro para Perfil
+                new Color(28, 90, 255),
+                new Color(28, 90, 255),
+                new Color(28, 90, 255),
+                new Color(28, 90, 255),
+                new Color(28, 90, 255),
+                new Color(28, 90, 255)
         };
 
         for (int i = 0; i < menuItems.length; i++) {
@@ -72,9 +72,10 @@ public class SidebarView extends JPanel {
                     }
                     break;
                 case "💰 Depósito": depositBtn = menuBtn; break;
-                case "💸 Levantamento": withdrawBtn = menuBtn; break;
-                case "🔄 Transferência": transferBtn = menuBtn; break;
+                case "\uD83E\uDE99 Levantamento": withdrawBtn = menuBtn; break;
+                case "\uD83D\uDCB1 Transferência": transferBtn = menuBtn; break;
                 case "📊 Extrato": statementBtn = menuBtn; break;
+                case "👤 Perfil": profileBtn = menuBtn; break;
             }
         }
         return menuPanel;
@@ -226,6 +227,7 @@ public class SidebarView extends JPanel {
     public JButton getWithdrawBtn() { return withdrawBtn; }
     public JButton getTransferBtn() { return transferBtn; }
     public JButton getStatementBtn() { return statementBtn; }
+    public JButton getProfileBtn(){return profileBtn;}
     public JButton getLogoutBtn() { return logoutBtn; }
 
     public void setUserInfo(String name, String accountNumber) {

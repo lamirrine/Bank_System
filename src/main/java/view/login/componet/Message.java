@@ -8,6 +8,8 @@ import javax.swing.ImageIcon;
 
 public class Message extends javax.swing.JPanel {
 
+    private javax.swing.JLabel lbMessage;
+
     public boolean isShow() {
         return show;
     }
@@ -80,8 +82,4 @@ public class Message extends javax.swing.JPanel {
     public static enum MessageType {
         SUCCESS, ERROR
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel lbMessage;
-    // End of variables declaration//GEN-END:variables
 }

@@ -6,7 +6,6 @@ import model.services.AccountService;
 import model.services.CustomerService;
 import model.services.StatementService;
 import view.DashboardView;
-import view.login.componet.Loginview;
 
 import javax.swing.*;
 import java.util.List;
@@ -23,6 +22,7 @@ public class DashboardController {
     private WithdrawController withdrawController;
     private TransferController transferController;
     private StatementController statementController;
+    private ProfileController profileController;
 
     public DashboardController(DashboardView view, AccountService accountService,
                                StatementService statementService, CustomerService customerService,
@@ -72,11 +72,20 @@ public class DashboardController {
                     currentCustomer.getUserId()
             );
 
+            this.profileController = new ProfileController(
+                    view.getProfileView(),
+                    customerService,
+                    accountService,
+                    accountsForUse,
+                    currentCustomer.getUserId()
+            );
+
             setupSidebarListeners();
             setupDepositNavigation();
             setupWithdrawNavigation();
             setupTransferNavigation();
             setupStatementNavigation();
+            setupProfileNavigation();
 
         } catch (Exception e) {
             System.err.println("Erro ao inicializar controllers: " + e.getMessage());
@@ -106,10 +115,17 @@ public class DashboardController {
             openTransfer();
         });
 
+
         // Statement button
         view.getSidebarView().getStatementBtn().addActionListener(e -> {
             view.getSidebarView().setActiveButton(view.getSidebarView().getStatementBtn());
             openStatement();
+        });
+
+        // Profile button
+        view.getSidebarView().getProfileBtn().addActionListener(e -> {
+            view.getSidebarView().setActiveButton(view.getSidebarView().getProfileBtn());
+            openProfile();
         });
 
         // Logout button
@@ -140,7 +156,12 @@ public class DashboardController {
         });
     }
 
-    // NOVO MÉTODO: showHomepage
+    private void setupProfileNavigation() { // NOVO
+        view.getProfileView().getCancelButton().addActionListener(e -> {
+            returnToHomepage();
+        });
+    }
+
     private void showHomepage() {
         try {
             view.getSidebarView().setActiveButton(view.getSidebarView().getHomeButton());
@@ -203,6 +224,19 @@ public class DashboardController {
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(view,
                     "Erro ao abrir tela de extrato: " + ex.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void openProfile() { // NOVO
+        try {
+            if (customerAccounts != null) {
+                profileController.updateCustomerAccounts(customerAccounts);
+            }
+            view.showProfileView();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view,
+                    "Erro ao abrir tela de perfil: " + ex.getMessage(),
                     "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -294,6 +328,9 @@ public class DashboardController {
         if (statementController != null) {
             statementController.updateCustomerAccounts(accounts);
         }
+        if (profileController != null) {
+            profileController.updateCustomerAccounts(accounts);
+        }
     }
 
     private double calculateTotalBalance(List<Account> accounts) {
@@ -377,7 +414,6 @@ public class DashboardController {
             }
 
             view.dispose();
-            new Loginview().setVisible(true);
         }
     }
 

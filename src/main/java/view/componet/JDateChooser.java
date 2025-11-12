@@ -1,11 +1,10 @@
-package view;
+package view.componet;
 
 import javax.swing.*;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-//Componente simples para seleção de datas
 public class JDateChooser extends JPanel {
     private JTextField dateField;
     private JButton calendarButton;

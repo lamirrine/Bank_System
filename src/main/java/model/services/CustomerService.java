@@ -3,17 +3,18 @@ package model.services;
 import model.dao.ICustomerDAO;
 import model.dao.IUserDAO;
 import model.dao.impl.CustomerDAO;
+import model.dao.impl.UserDAO;
 import model.entities.Customer;
+import model.entities.User;
+import utils.PasswordUtil;
+
 import java.sql.SQLException;
 
 public class CustomerService {
 
-    // Dependências injetadas
     private IUserDAO userDAO;
     private ICustomerDAO customerDAO;
 
-
-    // Construtor para Injeção de Dependência
     public CustomerService(IUserDAO userDAO) {
         this.userDAO = userDAO;
     }
@@ -23,6 +24,7 @@ public class CustomerService {
     }
 
     public CustomerService() {
+        this.userDAO = new UserDAO();
         this.customerDAO = new CustomerDAO();
     }
 
@@ -43,38 +45,40 @@ public class CustomerService {
     }
 
     public Customer registerCustomer(Customer customer) throws Exception {
-
-        // --- 1. Lógica de Validação (KYC) ---
+        // Validações
         if (customer.getEmail() == null || customer.getEmail().isEmpty()) {
             throw new IllegalArgumentException("O email é obrigatório.");
         }
 
-        // Regra de Negócio: Deve ter pelo menos um documento de identificação
-        if (customer.getBiNumber() == null && customer.getPassportNumber() == null) {
+        // Verificar se email já existe
+        User existingUser = userDAO.findByEmail(customer.getEmail());
+        if (existingUser != null) {
+            throw new IllegalArgumentException("Este email já está registrado.");
+        }
+
+        // Verificar documentos
+        if ((customer.getBiNumber() == null || customer.getBiNumber().isEmpty()) &&
+                (customer.getPassportNumber() == null || customer.getPassportNumber().isEmpty())) {
             throw new IllegalArgumentException("É obrigatório fornecer BI ou Passaporte para registo.");
         }
 
-        // Regra de Negócio: Verificar duplicidade
-        // TODO: userDAO.findByEmail(customer.getEmail()) deve ser null
-        // TODO: customerDAO.findByBiNumber(customer.getBiNumber()) deve ser null
-
-        // --- 2. Preparação de Dados (Segurança) ---
-        // TODO: Encriptar a senha inicial antes de salvar
-        // customer.setPassHash(PasswordUtil.hash(customer.getPassHash()));
-
-        // --- 3. Transação Atómica (Salvar User e Customer) ---
         try {
-            // A. Salvar na tabela user (obtem o novo user_id através do DAO)
+            // Hash da senha usando PasswordUtil
+            String hashedPassword = PasswordUtil.hashPassword(customer.getPassHash());
+            customer.setPassHash(hashedPassword);
+
+            // Salvar na tabela user
             userDAO.save(customer);
 
-            // B. Usar o user_id retornado (agora em customer.getUserId()) para salvar na tabela customer
+            // Salvar na tabela customer
             customerDAO.save(customer);
 
             return customer;
+
         } catch (SQLException e) {
-            // CRÍTICO: Em caso de falha no customerDAO.save(), o userDAO.save() PRECISA de ROLLBACK
-            throw new Exception("Falha crítica no registo do cliente. A transação foi revertida.", e);
+            throw new Exception("Falha no registo do cliente: " + e.getMessage(), e);
         }
     }
+
 
 }

@@ -11,11 +11,7 @@ public class PasswordUtil {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
 
-            // --- CORREÇÃO CRÍTICA: USAR UTF-8 EXPLICITAMENTE ---
-            // Força o uso do UTF-8, garantindo que o hash gerado é o mesmo
-            // no registo e no login, independentemente da codificação padrão do sistema.
             md.update(plainText.getBytes(StandardCharsets.UTF_8));
-            // ----------------------------------------------------
 
             byte[] hashedBytes = md.digest();
             return Base64.getEncoder().encodeToString(hashedBytes);
@@ -24,7 +20,6 @@ public class PasswordUtil {
         }
     }
 
-    // O método checkPassword() continua o mesmo:
     public static boolean checkPassword(String plainPassword, String storedHash) {
         if (plainPassword == null || storedHash == null) {
             return false;
@@ -32,4 +27,5 @@ public class PasswordUtil {
         String inputHash = hashPassword(plainPassword);
         return inputHash.equals(storedHash);
     }
+
 }

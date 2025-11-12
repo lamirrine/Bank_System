@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 public class AccountService {
 
@@ -57,6 +58,68 @@ public class AccountService {
             this.authService = new AuthenticationService(null, this.accountDAO);
         }
         return authService;
+    }
+
+    public Account createNewAccount(int customerId, String accountType, String pin) throws Exception {
+        if (pin == null || pin.length() != 4 || !pin.matches("\\d+")) {
+            throw new IllegalArgumentException("PIN deve conter exatamente 4 dígitos numéricos");
+        }
+
+        try {
+            // Gerar número de conta único
+            String accountNumber = generateAccountNumber();
+
+            // Criar hash do PIN
+            String pinHash = utils.PasswordUtil.hashPassword(pin);
+
+            // Determinar tipo de conta
+            model.enums.AccountType type = model.enums.AccountType.valueOf(accountType.toUpperCase());
+
+            // Definir limites baseados no tipo de conta
+            double dailyWithdrawLimit = type == model.enums.AccountType.CORRENTE ? 3250.00 : 5000.00;
+            double dailyTransferLimit = type == model.enums.AccountType.CORRENTE ? 10000.00 : 20000.00;
+
+            // Criar conta
+            Account account = new Account(
+                    0, // ID será gerado pelo banco
+                    accountNumber,
+                    type,
+                    0.0, // Saldo inicial zero
+                    new Date(),
+                    null, // Data de fechamento (null)
+                    model.enums.AccountStatus.ATIVA,
+                    customerId,
+                    1, // ID da agência padrão (ajuste conforme necessário)
+                    dailyWithdrawLimit,
+                    dailyTransferLimit,
+                    pinHash
+            );
+
+            // Salvar conta no banco
+            accountDAO.save(account);
+
+            System.out.println("Nova conta criada: " + accountNumber + " - Tipo: " + accountType);
+            return account;
+
+        } catch (SQLException e) {
+            throw new Exception("Erro ao criar conta: " + e.getMessage(), e);
+        }
+    }
+
+    private String generateAccountNumber() {
+        Random random = new Random();
+        // Gera número de conta no formato: 10000000 - 99999999
+        int accountNum = 10000000 + random.nextInt(90000000);
+        return String.valueOf(accountNum);
+    }
+
+    public boolean accountNumberExists(String accountNumber) {
+        try {
+            Account account = accountDAO.findByAccountNumber(accountNumber);
+            return account != null;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public List<Account> findAccountsByCustomerId(int customerId) {

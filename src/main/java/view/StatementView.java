@@ -1,13 +1,12 @@
 package view;
 
 import net.miginfocom.swing.MigLayout;
+import view.componet.JDateChooser;
 import view.componet.MyButton;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class StatementView extends JPanel {
     private JComboBox<String> accountComboBox;
