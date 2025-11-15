@@ -109,6 +109,56 @@ public class AccountDAO implements IAccountDAO {
     }
 
     @Override
+    public List<Account> findByFilters(String accountType, String status) throws SQLException {
+        List<Account> accounts = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM account WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (accountType != null && !accountType.equals("Todos")) {
+            sql.append(" AND account_type = ?");
+            params.add(accountType.toUpperCase());
+        }
+
+        if (status != null && !status.equals("Todos")) {
+            sql.append(" AND status = ?");
+            params.add(status.toUpperCase());
+        }
+
+        sql.append(" ORDER BY open_date DESC");
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    accounts.add(mapResultSetToAccount(rs));
+                }
+            }
+        }
+        return accounts;
+    }
+
+    @Override
+    public List<Account> findAll() throws SQLException {
+        List<Account> accounts = new ArrayList<>();
+        String sql = "SELECT * FROM account ORDER BY open_date DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                accounts.add(mapResultSetToAccount(rs));
+            }
+        }
+        return accounts;
+    }
+
+    @Override
     public Account findByAccountNumber(String accountNumber) {
         String sql = "SELECT * FROM account WHERE account_number = ?";
 

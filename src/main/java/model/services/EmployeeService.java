@@ -1,20 +1,24 @@
 package model.services;
 
 import model.dao.*;
+import model.dao.impl.EmployeeDAO;
+import model.dao.impl.UserDAO;
 import model.entities.*;
 import model.enums.AccessLevel;
+import model.dao.IEmployeeDAO;
+import model.dao.IUserDAO;
+import model.entities.Employee;
+import utils.PasswordUtil;
 import model.enums.AccountStatus;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 
-/**
- * Serviço responsável pela gestão de funcionários e operações internas (ex: abertura de conta).
- * Aplica regras de autorização baseadas no nível de acesso.
- */
 public class EmployeeService {
 
     // Dependências injetadas
     private IEmployeeDAO employeeDAO;
+    private IUserDAO userDAO;
     private IAccountDAO accountDAO;
     private IAgencyDAO agencyDAO;
     private ITransactionDAO transactionDAO; // Para registrar o depósito inicial
@@ -27,76 +31,94 @@ public class EmployeeService {
         this.transactionDAO = transactionDAO;
     }
 
-    /**
-     * Verifica se o funcionário tem a permissão mínima necessária.
-     */
+    public EmployeeService() {
+        this.userDAO = new UserDAO();
+        this.employeeDAO = new EmployeeDAO();
+    }
+
+    public EmployeeService(IUserDAO userDAO, IEmployeeDAO employeeDAO) {
+        this.userDAO = userDAO;
+        this.employeeDAO = employeeDAO;
+    }
+
     private boolean hasPermission(Employee employee, AccessLevel requiredLevel) {
         return employee.getAccessLevel().ordinal() >= requiredLevel.ordinal();
     }
 
-    /**
-     * Permite a um funcionário (no mínimo STAFF) abrir uma nova conta para um cliente existente.
-     * @param openerEmployee Funcionário que está realizando a operação (para verificação de permissão).
-     * @param customerId ID do cliente que será o dono da conta.
-     * @param newAccount Objeto Account com os dados de abertura.
-     * @param initialDeposit Valor do depósito inicial.
-     * @return A nova Account com o ID/Número gerado.
-     * @throws Exception Se a permissão for negada ou a operação falhar.
-     */
-    public Account openNewAccount(Employee openerEmployee, int customerId, Account newAccount, double initialDeposit) throws Exception {
-
-        // 1. Autorização: Requer nível mínimo de STAFF
-        if (!hasPermission(openerEmployee, AccessLevel.STAFF)) {
-            throw new SecurityException("Acesso negado: Nível de acesso insuficiente para abrir contas.");
-        }
-
-        // 2. Preenchimento de Dados Essenciais
-        if (newAccount.getOpenDate() == null) {
-            newAccount.setOpenDate(new Date());
-        }
-        newAccount.setStatus(AccountStatus.ATIVA);
-        newAccount.setOwnerCustomerId(customerId);
-        newAccount.setBalance(0.0); // O depósito inicial será feito separadamente
-
-        // TODO: Gerar newAccount.setAccountNumber(generateUniqueNumber());
-
-        // 3. Persistência (Transação Atómica: Abrir Conta + Depósito Inicial)
+    public Employee login(String email, String password) throws Exception {
         try {
-            // A. Salva a nova conta (obtem o novo account_id)
-            accountDAO.save(newAccount);
+            Employee employee = employeeDAO.findByEmail(email);
 
-            // B. Realiza o depósito inicial (se houver)
-            if (initialDeposit > 0) {
-
-                // Atualiza o saldo diretamente (embora o AccountService seja mais indicado para isso)
-                accountDAO.updateBalance(newAccount.getAccountId(), initialDeposit);
-                newAccount.setBalance(initialDeposit); // Atualiza o objeto em memória
-
-                // C. Registra a transação de depósito inicial
-                Transaction transaction = new Transaction(
-                        0, model.enums.TransactionType.DEPOSITO, initialDeposit, new Date(),
-                        model.enums.TransactionStatus.CONCLUIDA, "Depósito Inicial - Abertura de Conta",
-                        newAccount.getAccountId(), 0, initialDeposit, 0.0);
-                transactionDAO.save(transaction);
+            if (employee == null) {
+                throw new Exception("Funcionário não encontrado.");
             }
 
-            return newAccount;
+            if (!PasswordUtil.checkPassword(password, employee.getPassHash())) {
+                throw new Exception("Senha incorreta.");
+            }
+
+            return employee;
+
         } catch (SQLException e) {
-            throw new Exception("Falha crítica ao abrir nova conta.", e);
+            throw new Exception("Erro de banco de dados: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Permite a um funcionário (MANAGER/ADMIN) atualizar o estado de uma agência.
-     */
-    public void updateAgencyDetails(Employee updaterEmployee, Agency agency) throws Exception {
-        if (!hasPermission(updaterEmployee, AccessLevel.MANAGER)) {
-            throw new SecurityException("Acesso negado: Apenas Gerentes e Admin podem atualizar Agências.");
+    public Employee registerEmployee(Employee employee) throws Exception {
+        // Validações
+        if (employee.getEmail() == null || employee.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("O email é obrigatório.");
         }
+
+        // Verificar se email já existe
+        var existingUser = userDAO.findByEmail(employee.getEmail());
+        if (existingUser != null) {
+            throw new IllegalArgumentException("Este email já está registrado.");
+        }
+
         try {
-            agencyDAO.update(agency);
+            // Hash da senha
+            String hashedPassword = PasswordUtil.hashPassword(employee.getPassHash());
+            employee.setPassHash(hashedPassword);
+
+            // Salvar na tabela user
+            userDAO.save(employee);
+
+            // Salvar na tabela employee
+            employeeDAO.save(employee);
+
+            return employee;
+
         } catch (SQLException e) {
-            throw new Exception("Falha ao atualizar dados da agência.", e);
+            throw new Exception("Falha no registo do funcionário: " + e.getMessage(), e);
         }
+    }
+
+    public List<Employee> getAllEmployees() {
+        return employeeDAO.findAll();
+    }
+
+    public List<Employee> getEmployeesByAccessLevel(AccessLevel accessLevel) {
+        return employeeDAO.findByAccessLevel(accessLevel);
+    }
+
+    public Employee getEmployeeById(int employeeId) throws SQLException {
+        return employeeDAO.findById(employeeId);
+    }
+
+    public boolean updateEmployeeAccessLevel(int employeeId, AccessLevel newAccessLevel) {
+        try {
+            employeeDAO.updateAccessLevel(employeeId, newAccessLevel);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteEmployee(int employeeId) {
+        // Implementar lógica de exclusão (se necessário)
+        // Nota: Em sistemas reais, geralmente fazemos soft delete
+        return false;
     }
 }

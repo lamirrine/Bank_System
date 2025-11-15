@@ -1,67 +1,43 @@
+// Employee.java
 package model.entities;
 
-import model.enums.AccessLevel; // IMPORTAR O ENUM AQUI!
+import model.enums.AccessLevel;
 import model.enums.UserType;
 
-import java.util.Date;
-
-// A classe Employee estende User
 public class Employee extends User {
-
-    private String employeeId;
-    private AccessLevel accessLevel; // <-- CORREÇÃO: Tipo mudou para Enum
+    private AccessLevel accessLevel;
     private boolean isSupervisor;
 
-    // Construtor Padrão
     public Employee() {
         super();
-        this.setUserType(UserType.valueOf("EMPLOYEE"));
+        this.setUserType(UserType.EMPLOYEE);
+        this.accessLevel = AccessLevel.STAFF;
+        this.isSupervisor = false;
     }
 
-    // Construtor para Registo
-    public Employee(String firstName, String lastName, String email, String phone, String passHash, String address,
-                    String employeeId, AccessLevel accessLevel, boolean isSupervisor) { // <-- AccessLevel no argumento
-
-        super(firstName, lastName, email, phone, passHash, address, UserType.valueOf("EMPLOYEE"));
-
-        this.employeeId = employeeId;
+    public Employee(String firstName, String lastName, String email, String phone,
+                    String passHash, String address, AccessLevel accessLevel, boolean isSupervisor) {
+        super(firstName, lastName, email, phone, passHash, address, UserType.EMPLOYEE);
         this.accessLevel = accessLevel;
         this.isSupervisor = isSupervisor;
     }
 
-    // Construtor para Carregamento (inclui userId)
-    public Employee(int userId, String firstName, String lastName, String email, String phone, String passHash, String address,
-                    String employeeId, AccessLevel accessLevel, boolean isSupervisor) { // <-- AccessLevel no argumento
-
-        super(userId, firstName, lastName, email, phone, passHash, address, UserType.valueOf("EMPLOYEE"));
-
-        this.employeeId = employeeId;
+    public Employee(int userId, String firstName, String lastName, String email,
+                    String phone, String passHash, String address, AccessLevel accessLevel, boolean isSupervisor) {
+        super(userId, firstName, lastName, email, phone, passHash, address, UserType.EMPLOYEE);
         this.accessLevel = accessLevel;
         this.isSupervisor = isSupervisor;
     }
 
-    // --- Getters e Setters ---
-    public String getEmployeeId() {
-        return employeeId;
-    }
+    // Getters e Setters
+    public AccessLevel getAccessLevel() { return accessLevel; }
+    public void setAccessLevel(AccessLevel accessLevel) { this.accessLevel = accessLevel; }
 
-    public void setEmployeeId(String employeeId) {
-        this.employeeId = employeeId;
-    }
+    public boolean isSupervisor() { return isSupervisor; }
+    public void setSupervisor(boolean supervisor) { isSupervisor = supervisor; }
 
-    public AccessLevel getAccessLevel() {
-        return accessLevel;
-    }
-
-    public void setAccessLevel(AccessLevel accessLevel) { // O setter recebe o Enum
-        this.accessLevel = accessLevel;
-    }
-
-    public boolean isSupervisor() {
-        return isSupervisor;
-    }
-
-    public void setIsSupervisor(boolean isSupervisor) {
-        this.isSupervisor = isSupervisor;
+    @Override
+    public String toString() {
+        return getFullName() + " - " + accessLevel + (isSupervisor ? " (Supervisor)" : "");
     }
 }

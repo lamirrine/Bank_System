@@ -7,13 +7,11 @@ import model.dao.impl.TransactionDAO;
 import model.entities.Account;
 import model.entities.Transaction;
 import model.enums.AccountStatus;
+import model.enums.AccountType;
 import model.enums.TransactionType;
 import model.enums.TransactionStatus;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class AccountService {
 
@@ -58,6 +56,16 @@ public class AccountService {
             this.authService = new AuthenticationService(null, this.accountDAO);
         }
         return authService;
+    }
+
+    public List<Account> getAllAccounts() {
+        try {
+            return accountDAO.findAll();
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar todas as contas: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>(); // Retorna lista vazia em caso de erro
+        }
     }
 
     public Account createNewAccount(int customerId, String accountType, String pin) throws Exception {
@@ -136,6 +144,51 @@ public class AccountService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<Account> findAccountsByFilters(String accountType, String status) {
+        try {
+            return accountDAO.findByFilters(accountType, status);
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar contas com filtros: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Obtém estatísticas gerais das contas
+     */
+    public Map<String, Object> getAccountStats() {
+        Map<String, Object> stats = new HashMap<>();
+        try {
+            List<Account> accounts = accountDAO.findAll();
+
+            long totalAccounts = accounts.size();
+            long activeAccounts = accounts.stream()
+                    .filter(acc -> acc.getStatus() == AccountStatus.ATIVA)
+                    .count();
+            double totalBalance = accounts.stream()
+                    .mapToDouble(Account::getBalance)
+                    .sum();
+            long correnteCount = accounts.stream()
+                    .filter(acc -> acc.getAccountType() == AccountType.CORRENTE)
+                    .count();
+            long poupancaCount = accounts.stream()
+                    .filter(acc -> acc.getAccountType() == AccountType.POUPANCA)
+                    .count();
+
+            stats.put("totalAccounts", totalAccounts);
+            stats.put("activeAccounts", activeAccounts);
+            stats.put("totalBalance", totalBalance);
+            stats.put("correnteCount", correnteCount);
+            stats.put("poupancaCount", poupancaCount);
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao calcular estatísticas: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return stats;
     }
 
     public Account findAccountByNumber(String accountNumber) {

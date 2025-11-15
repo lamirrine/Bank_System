@@ -57,6 +57,52 @@ public class CustomerDAO implements ICustomerDAO {
     }
 
     @Override
+    public List<Customer> findAll() {
+        List<Customer> customers = new ArrayList<>();
+        String sql = "SELECT u.*, c.bi_number, c.nuit, c.passport_number " +
+                "FROM user u JOIN customer c ON u.user_id = c.customer_id " +
+                "ORDER BY u.registration_date DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                customers.add(mapResultSetToCustomer(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return customers;
+    }
+
+    @Override
+    public List<Customer> findBySearchTerm(String searchTerm) throws SQLException {
+        List<Customer> customers = new ArrayList<>();
+        String sql = "SELECT u.*, c.bi_number, c.nuit, c.passport_number " +
+                "FROM user u JOIN customer c ON u.user_id = c.customer_id " +
+                "WHERE u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ? OR c.bi_number LIKE ? " +
+                "ORDER BY u.registration_date DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            String likeTerm = "%" + searchTerm + "%";
+            stmt.setString(1, likeTerm);
+            stmt.setString(2, likeTerm);
+            stmt.setString(3, likeTerm);
+            stmt.setString(4, likeTerm);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    customers.add(mapResultSetToCustomer(rs));
+                }
+            }
+        }
+        return customers;
+    }
+
+    @Override
     public Customer findByEmail(String email) {
         String sql = "SELECT u.*, c.bi_number, c.nuit, c.passport_number " +
                 "FROM user u JOIN customer c ON u.user_id = c.customer_id " +
@@ -77,24 +123,6 @@ public class CustomerDAO implements ICustomerDAO {
         return null;
     }
 
-    @Override
-    public List<Customer> findAll() {
-        List<Customer> customers = new ArrayList<>();
-        String sql = "SELECT u.*, c.bi_number, c.nuit, c.passport_number " +
-                "FROM user u JOIN customer c ON u.user_id = c.customer_id";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                customers.add(mapResultSetToCustomer(rs));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return customers;
-    }
 
     private Customer mapResultSetToCustomer(ResultSet rs) throws SQLException {
         return new Customer(
@@ -110,4 +138,6 @@ public class CustomerDAO implements ICustomerDAO {
                 rs.getString("passport_number")
         );
     }
+
+
 }

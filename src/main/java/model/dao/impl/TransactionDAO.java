@@ -3,9 +3,14 @@ package model.dao.impl;
 import model.dao.ITransactionDAO;
 import model.entities.Transaction;
 import config.DatabaseConnection;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 public class TransactionDAO implements ITransactionDAO {
 
@@ -98,7 +103,7 @@ public class TransactionDAO implements ITransactionDAO {
     }
 
     @Override
-    public List<Transaction> findByAccountIdAndPeriod(int accountId, Date startDate, Date endDate) throws SQLException {
+    public List<Transaction> findByAccountIdAndPeriod(int accountId, java.util.Date startDate, java.util.Date endDate) throws SQLException {
         String sql = "SELECT * FROM transaction WHERE (source_account_id = ? OR destination_account_id = ?) " +
                 "AND timestamp BETWEEN ? AND ? " +
                 "ORDER BY timestamp DESC";
@@ -186,5 +191,96 @@ public class TransactionDAO implements ITransactionDAO {
         transaction.setFeeAmount(rs.getDouble("fee_amount"));
 
         return transaction;
+    }
+
+    // No TransactionDAO.java, adicione:
+
+    /**
+     * Busca todas as transações
+     */
+    @Override
+    public List<Transaction> findAll() throws SQLException {
+        List<Transaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM transaction ORDER BY timestamp DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                transactions.add(mapResultSetToTransaction(rs));
+            }
+        }
+        return transactions;
+    }
+
+    /**
+     * Busca transações com filtros
+     */
+    @Override
+    public List<Transaction> findByFilters(String type, String status, Date startDate, Date endDate) throws SQLException {
+        List<Transaction> transactions = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM transaction WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (type != null && !type.equals("Todos")) {
+            sql.append(" AND type = ?");
+            params.add(type.toUpperCase());
+        }
+
+        if (status != null && !status.equals("Todos")) {
+            sql.append(" AND status = ?");
+            params.add(status.toUpperCase());
+        }
+
+        if (startDate != null) {
+            sql.append(" AND timestamp >= ?");
+            params.add(new java.sql.Timestamp(startDate.getTime()));
+        }
+
+        if (endDate != null) {
+            sql.append(" AND timestamp <= ?");
+            params.add(new java.sql.Timestamp(endDate.getTime()));
+        }
+
+        sql.append(" ORDER BY timestamp DESC");
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    transactions.add(mapResultSetToTransaction(rs));
+                }
+            }
+        }
+        return transactions;
+    }
+
+    /**
+     * Busca transações por intervalo de datas
+     */
+    @Override
+    public List<Transaction> findByDateRange(Date startDate, Date endDate) throws SQLException {
+        List<Transaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM transaction WHERE timestamp BETWEEN ? AND ? ORDER BY timestamp DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setTimestamp(1, new java.sql.Timestamp(startDate.getTime()));
+            stmt.setTimestamp(2, new java.sql.Timestamp(endDate.getTime()));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    transactions.add(mapResultSetToTransaction(rs));
+                }
+            }
+        }
+        return transactions;
     }
 }

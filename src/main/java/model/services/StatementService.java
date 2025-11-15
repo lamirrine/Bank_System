@@ -3,8 +3,11 @@ package model.services;
 import model.dao.ITransactionDAO;
 import model.dao.impl.TransactionDAO;
 import model.entities.Transaction;
+import model.enums.TransactionType;
+
+import java.sql.SQLException;
 import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class StatementService {
@@ -37,6 +40,73 @@ public class StatementService {
         }
     }
 
+    // No StatementService.java, adicione estes métodos:
+
+    /**
+     * Obtém todas as transações do sistema (para administração)
+     */
+    public List<Transaction> getAllTransactions() {
+        try {
+            return transactionDAO.findAll();
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar todas as transações: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>(); // Retorna lista vazia em caso de erro
+        }
+    }
+
+    /**
+     * Busca transações com filtros (para administração)
+     */
+    public List<Transaction> findTransactionsByFilters(String type, String status, Date startDate, Date endDate) {
+        try {
+            return transactionDAO.findByFilters(type, status, startDate, endDate);
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar transações com filtros: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Obtém estatísticas gerais das transações
+     */
+    public Map<String, Object> getTransactionStats(Date startDate, Date endDate) {
+        Map<String, Object> stats = new HashMap<>();
+        try {
+            List<Transaction> transactions = transactionDAO.findByDateRange(startDate, endDate);
+
+            long totalTransactions = transactions.size();
+            double totalVolume = transactions.stream()
+                    .mapToDouble(Transaction::getAmount)
+                    .sum();
+            double totalFees = transactions.stream()
+                    .mapToDouble(Transaction::getFeeAmount)
+                    .sum();
+
+            long depositos = transactions.stream()
+                    .filter(t -> t.getType() == TransactionType.DEPOSITO)
+                    .count();
+            long levantamentos = transactions.stream()
+                    .filter(t -> t.getType() == TransactionType.LEVANTAMENTO)
+                    .count();
+            long transferencias = transactions.stream()
+                    .filter(t -> t.getType() == TransactionType.TRANSFERENCIA)
+                    .count();
+
+            stats.put("totalTransactions", totalTransactions);
+            stats.put("totalVolume", totalVolume);
+            stats.put("totalFees", totalFees);
+            stats.put("depositos", depositos);
+            stats.put("levantamentos", levantamentos);
+            stats.put("transferencias", transferencias);
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao calcular estatísticas de transações: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return stats;
+    }
     // NOVO: Buscar transações por conta e período
     public List<Transaction> getTransactionsByAccountAndPeriod(int accountId, Date startDate, Date endDate) {
         try {

@@ -1,13 +1,15 @@
 package controller;
 
-import model.entities.Customer;
-import model.entities.User;
+import model.entities.*;
 import model.services.*;
+import view.*;
 import view.login.componet.CreateAccountPinView;
+import view.login.componet.EmployeeLoginView;
 import view.login.componet.Loginview;
-import view.UserTypeSelectionView;
-import view.DashboardView;
+
 import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
 
 public class AuthenticationController {
     private UserTypeSelectionView typeSelectionView;
@@ -47,14 +49,477 @@ public class AuthenticationController {
     private void showClientLogin() {
         typeSelectionView.setVisible(false);
         loginview.setVisible(true);
-        //loginView.setVisible(true);
     }
 
     private void showEmployeeLogin() {
         typeSelectionView.setVisible(false);
-        JOptionPane.showMessageDialog(typeSelectionView,
-                "Login de funcionário em desenvolvimento!",
-                "Em Desenvolvimento", JOptionPane.INFORMATION_MESSAGE);
+
+        EmployeeLoginView employeeLoginView = new EmployeeLoginView(typeSelectionView);
+
+        // Listener para voltar
+        employeeLoginView.addBackListener(e -> {
+            employeeLoginView.dispose();
+            typeSelectionView.setVisible(true);
+        });
+
+        // Listener para login REAL
+        employeeLoginView.addLoginListener(e -> {
+            handleEmployeeLogin(employeeLoginView);
+        });
+
+        employeeLoginView.setVisible(true);
+    }
+
+    private void showCustomerManagement(EmployeeDashboardView dashboard, CustomerManagementView customerView) {
+        try {
+            // Carregar dados
+            CustomerService customerService = new CustomerService();
+            java.util.List<Customer> customers = customerService.findAllCustomers();
+            customerView.setCustomers(customers);
+            customerView.setStats(customers.size(), customers.size());
+
+            // Configurar botão voltar
+            customerView.getBackBtn().addActionListener(e -> {
+                dashboard.getContentPane().remove(customerView);
+                dashboard.revalidate();
+                dashboard.repaint();
+            });
+
+            // Mostrar no dashboard
+            dashboard.getContentPane().removeAll();
+            dashboard.getContentPane().add(customerView, "grow");
+            dashboard.revalidate();
+            dashboard.repaint();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(dashboard, "Erro ao carregar clientes: " + e.getMessage());
+        }
+    }
+
+    private void showAccountManagement(EmployeeDashboardView dashboard, AccountManagementView accountView) {
+        try {
+            // Carregar dados
+            AccountService accountService = new AccountService();
+            java.util.List<Account> accounts = accountService.getAllAccounts();
+            accountView.setAccounts(accounts);
+
+            double totalBalance = 0;
+            int activeAccounts = 0;
+            for (Account acc : accounts) {
+                totalBalance += acc.getBalance();
+                if (acc.getStatus() == model.enums.AccountStatus.ATIVA) {
+                    activeAccounts++;
+                }
+            }
+            accountView.setStats(accounts.size(), activeAccounts, totalBalance);
+
+            // Configurar botão voltar
+            accountView.getBackBtn().addActionListener(e -> {
+                dashboard.getContentPane().remove(accountView);
+                dashboard.revalidate();
+                dashboard.repaint();
+            });
+
+            // Mostrar no dashboard
+            dashboard.getContentPane().removeAll();
+            dashboard.getContentPane().add(accountView, "grow");
+            dashboard.revalidate();
+            dashboard.repaint();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(dashboard, "Erro ao carregar contas: " + e.getMessage());
+        }
+    }
+
+    private void showTransactionView(EmployeeDashboardView dashboard, TransactionView transactionView) {
+        try {
+            // Carregar dados
+            StatementService statementService = new StatementService();
+            java.util.List<Transaction> transactions = statementService.getAllTransactions();
+            transactionView.setTransactions(transactions);
+
+            double totalVolume = 0;
+            for (Transaction trans : transactions) {
+                totalVolume += trans.getAmount();
+            }
+            transactionView.setStats(transactions.size(), totalVolume);
+
+            // Configurar botão voltar
+            transactionView.getBackBtn().addActionListener(e -> {
+                dashboard.getContentPane().remove(transactionView);
+                dashboard.revalidate();
+                dashboard.repaint();
+            });
+
+            // Mostrar no dashboard
+            dashboard.getContentPane().removeAll();
+            dashboard.getContentPane().add(transactionView, "grow");
+            dashboard.revalidate();
+            dashboard.repaint();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(dashboard, "Erro ao carregar transações: " + e.getMessage());
+        }
+    }
+
+    private void showEmployeeManagement(EmployeeDashboardView dashboard, EmployeeManagementView employeeView) {
+        try {
+            // Carregar dados
+            EmployeeService employeeService = new EmployeeService();
+            java.util.List<Employee> employees = employeeService.getAllEmployees();
+            employeeView.setEmployees(employees);
+
+            int admins = 0, managers = 0, staff = 0;
+            for (Employee emp : employees) {
+                switch (emp.getAccessLevel()) {
+                    case ADMIN: admins++; break;
+                    case MANAGER: managers++; break;
+                    case STAFF: staff++; break;
+                }
+            }
+            employeeView.setStats(employees.size(), admins, managers, staff);
+
+            // Configurar botão voltar
+            employeeView.getBackBtn().addActionListener(e -> {
+                dashboard.getContentPane().remove(employeeView);
+                dashboard.revalidate();
+                dashboard.repaint();
+            });
+
+            // Mostrar no dashboard
+            dashboard.getContentPane().removeAll();
+            dashboard.getContentPane().add(employeeView, "grow");
+            dashboard.revalidate();
+            dashboard.repaint();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(dashboard, "Erro ao carregar funcionários: " + e.getMessage());
+        }
+    }
+
+    private void showReports(EmployeeDashboardView dashboard, ReportsView reportsView) {
+        // Configurar botão voltar
+        reportsView.getBackBtn().addActionListener(e -> {
+            dashboard.getContentPane().remove(reportsView);
+            dashboard.revalidate();
+            dashboard.repaint();
+        });
+
+        // Configurar gerar relatório
+        reportsView.getGenerateBtn().addActionListener(e -> {
+            String reportType = reportsView.getReportType();
+            String content = "=== RELATÓRIO: " + reportType + " ===\n\n";
+            content += "Período: " + reportsView.getDateFrom() + " a " + reportsView.getDateTo() + "\n\n";
+            content += "Dados de exemplo:\n";
+            content += "- Total de clientes: 150\n";
+            content += "- Total de contas: 180\n";
+            content += "- Saldo total: MZN 2.500.000,00\n";
+            content += "- Transações este mês: 1.250\n";
+            reportsView.setReportContent(content);
+        });
+
+        // Mostrar no dashboard
+        dashboard.getContentPane().removeAll();
+        dashboard.getContentPane().add(reportsView, "grow");
+        dashboard.revalidate();
+        dashboard.repaint();
+    }
+
+    private void handleEmployeeLogin(EmployeeLoginView loginView) {
+        String email = loginView.getEmail();
+        String password = loginView.getPassword();
+
+        if (email.isEmpty() || password.isEmpty()) {
+            loginView.showError("Por favor, preencha todos os campos!");
+            return;
+        }
+
+        try {
+            // Criar serviço de funcionário
+            EmployeeService employeeService = new EmployeeService();
+
+            // Fazer login
+            Employee employee = employeeService.login(email, password);
+
+            if (employee != null) {
+                // Login bem-sucedido - abrir dashboard
+                loginView.dispose();
+                openEmployeeDashboard(employee);
+            } else {
+                loginView.showError("Email ou senha incorretos!");
+            }
+
+        } catch (Exception ex) {
+            loginView.showError("Erro: " + ex.getMessage());
+        }
+    }
+
+    private void openEmployeeDashboard(Employee employee) {
+        EmployeeDashboardView dashboardView = new EmployeeDashboardView();
+
+        dashboardView.setUserInfo(
+                employee.getFullName(),
+                employee.getAccessLevel().toString(),
+                employee.getEmail()
+        );
+
+        // LOGOUT - Voltar para seleção de tipo
+        dashboardView.getLogoutBtn().addActionListener(e -> {
+            dashboardView.dispose();
+            typeSelectionView.setVisible(true);
+        });
+
+        // GESTÃO DE CLIENTES - Abrir em dialog
+        dashboardView.getManageCustomersBtn().addActionListener(e -> {
+            openCustomerManagement(dashboardView);
+        });
+
+        // GESTÃO DE CONTAS - Abrir em dialog
+        dashboardView.getManageAccountsBtn().addActionListener(e -> {
+            openAccountManagement(dashboardView);
+        });
+
+        // TRANSAÇÕES - Abrir em dialog
+        dashboardView.getViewTransactionsBtn().addActionListener(e -> {
+            openTransactionView(dashboardView);
+        });
+
+        // FUNCIONÁRIOS - Abrir em dialog (apenas admin)
+        if (employee.getAccessLevel() == model.enums.AccessLevel.ADMIN) {
+            dashboardView.getManageEmployeesBtn().addActionListener(e -> {
+                openEmployeeManagement(dashboardView);
+            });
+        } else {
+            dashboardView.getManageEmployeesBtn().setVisible(false);
+        }
+
+        // RELATÓRIOS - Abrir em dialog
+        dashboardView.getReportsBtn().addActionListener(e -> {
+            openReports(dashboardView);
+        });
+
+        dashboardView.setVisible(true);
+    }
+
+    private void openCustomerManagement(JFrame parent) {
+        JDialog dialog = new JDialog(parent, "Gestão de Clientes", true);
+        dialog.setSize(1980, 1080);
+        dialog.setLocationRelativeTo(parent);
+
+        CustomerManagementView customerView = new CustomerManagementView();
+
+        try {
+            CustomerService customerService = new CustomerService();
+            java.util.List<Customer> customers = customerService.findAllCustomers();
+            customerView.setCustomers(customers);
+            customerView.setStats(customers.size(), customers.size());
+        } catch (Exception ex) {
+            customerView.setCustomers(new ArrayList<>());
+            customerView.setStats(0, 0);
+        }
+
+        customerView.getBackBtn().addActionListener(e -> dialog.dispose());
+
+        customerView.getSearchBtn().addActionListener(e -> {
+            String searchText = customerView.getSearchText();
+            if (!searchText.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Buscando por: " + searchText);
+            }
+        });
+
+        customerView.getViewDetailsBtn().addActionListener(e -> {
+            int customerId = customerView.getSelectedCustomerId();
+            if (customerId != -1) {
+                JOptionPane.showMessageDialog(dialog, "Visualizando detalhes do cliente ID: " + customerId);
+            } else {
+                JOptionPane.showMessageDialog(dialog, "Selecione um cliente primeiro");
+            }
+        });
+
+        dialog.add(customerView);
+        dialog.setVisible(true);
+    }
+
+    private void openAccountManagement(JFrame parent) {
+        JDialog dialog = new JDialog(parent, "Gestão de Contas", true);
+        dialog.setSize(1980, 1080);
+        dialog.setLocationRelativeTo(parent);
+
+        AccountManagementView accountView = new AccountManagementView();
+
+        try {
+            // CARREGAR DADOS REAIS
+            AccountService accountService = new AccountService();
+            java.util.List<Account> accounts = accountService.getAllAccounts();
+            accountView.setAccounts(accounts);
+
+            double totalBalance = 0;
+            int activeAccounts = 0;
+            for (Account acc : accounts) {
+                totalBalance += acc.getBalance();
+                if (acc.getStatus() == model.enums.AccountStatus.ATIVA) {
+                    activeAccounts++;
+                }
+            }
+            accountView.setStats(accounts.size(), activeAccounts, totalBalance);
+        } catch (Exception ex) {
+            accountView.setAccounts(new ArrayList<>());
+            accountView.setStats(0, 0, 0);
+        }
+
+        // Configurar botão voltar
+        accountView.getBackBtn().addActionListener(e -> dialog.dispose());
+
+        // Configurar botão filtrar
+        accountView.getSearchBtn().addActionListener(e -> {
+            String tipo = accountView.getTypeFilter();
+            String status = accountView.getStatusFilter();
+            JOptionPane.showMessageDialog(dialog, "Filtrando - Tipo: " + tipo + ", Status: " + status);
+        });
+
+        // Configurar botão nova conta
+        accountView.getOpenAccountBtn().addActionListener(e -> {
+            JOptionPane.showMessageDialog(dialog, "Abrindo nova conta...");
+        });
+
+        dialog.add(accountView);
+        dialog.setVisible(true);
+    }
+
+    private void openTransactionView(JFrame parent) {
+        JDialog dialog = new JDialog(parent, "Visualizar Transações", true);
+        dialog.setSize(1920, 1080);
+        dialog.setLocationRelativeTo(parent);
+
+        TransactionView transactionView = new TransactionView();
+
+        try {
+            // CARREGAR DADOS REAIS
+            StatementService statementService = new StatementService();
+            java.util.List<Transaction> transactions = statementService.getAllTransactions();
+            transactionView.setTransactions(transactions);
+
+            double totalVolume = 0;
+            for (Transaction trans : transactions) {
+                totalVolume += trans.getAmount();
+            }
+            transactionView.setStats(transactions.size(), totalVolume);
+        } catch (Exception ex) {
+            transactionView.setTransactions(new ArrayList<>());
+            transactionView.setStats(0, 0);
+        }
+
+        // Configurar botão voltar
+        transactionView.getBackBtn().addActionListener(e -> dialog.dispose());
+
+        // Configurar botão filtrar
+        transactionView.getSearchBtn().addActionListener(e -> {
+            String tipo = transactionView.getTypeFilter();
+            String status = transactionView.getStatusFilter();
+            JOptionPane.showMessageDialog(dialog, "Filtrando transações...");
+        });
+
+        // Configurar botão exportar
+        transactionView.getExportBtn().addActionListener(e -> {
+            JOptionPane.showMessageDialog(dialog, "Exportando relatório...");
+        });
+
+        dialog.add(transactionView);
+        dialog.setVisible(true);
+    }
+
+    private void openEmployeeManagement(JFrame parent) {
+        JDialog dialog = new JDialog(parent, "Gestão de Funcionários", true);
+        dialog.setSize(1920, 1080);
+        dialog.setLocationRelativeTo(parent);
+
+        EmployeeManagementView employeeView = new EmployeeManagementView();
+
+        try {
+            // CARREGAR DADOS REAIS
+            EmployeeService employeeService = new EmployeeService();
+            java.util.List<Employee> employees = employeeService.getAllEmployees();
+            employeeView.setEmployees(employees);
+
+            int admins = 0, managers = 0, staff = 0;
+            for (Employee emp : employees) {
+                switch (emp.getAccessLevel()) {
+                    case ADMIN: admins++; break;
+                    case MANAGER: managers++; break;
+                    case STAFF: staff++; break;
+                }
+            }
+            employeeView.setStats(employees.size(), admins, managers, staff);
+        } catch (Exception ex) {
+            employeeView.setEmployees(new ArrayList<>());
+            employeeView.setStats(0, 0, 0, 0);
+        }
+
+        // Configurar botão voltar
+        employeeView.getBackBtn().addActionListener(e -> dialog.dispose());
+
+        // Configurar botão adicionar funcionário
+        employeeView.getAddEmployeeBtn().addActionListener(e -> {
+            JOptionPane.showMessageDialog(dialog, "Adicionando novo funcionário...");
+        });
+
+        // Configurar botão editar
+        employeeView.getEditEmployeeBtn().addActionListener(e -> {
+            int employeeId = employeeView.getSelectedEmployeeId();
+            if (employeeId != -1) {
+                JOptionPane.showMessageDialog(dialog, "Editando funcionário ID: " + employeeId);
+            } else {
+                JOptionPane.showMessageDialog(dialog, "Selecione um funcionário primeiro");
+            }
+        });
+
+        dialog.add(employeeView);
+        dialog.setVisible(true);
+    }
+
+    private void openReports(JFrame parent) {
+        JDialog dialog = new JDialog(parent, "Relatórios", true);
+        dialog.setSize(1920, 1080);
+        dialog.setLocationRelativeTo(parent);
+
+        ReportsView reportsView = new ReportsView();
+
+        // Configurar botão voltar
+        reportsView.getBackBtn().addActionListener(e -> dialog.dispose());
+
+        // Configurar gerar relatório
+        reportsView.getGenerateBtn().addActionListener(e -> {
+            String reportType = reportsView.getReportType();
+            String content = "=== RELATÓRIO: " + reportType + " ===\n\n";
+            content += "Período: " + reportsView.getDateFrom() + " a " + reportsView.getDateTo() + "\n\n";
+            content += "Dados de exemplo:\n";
+            content += "- Total de clientes: 150\n";
+            content += "- Total de contas: 180\n";
+            content += "- Saldo total: MZN 2.500.000,00\n";
+            content += "- Transações este mês: 1.250\n";
+            reportsView.setReportContent(content);
+        });
+
+        dialog.add(reportsView);
+        dialog.setVisible(true);
+    }
+
+    private void showView(EmployeeDashboardView dashboard, JPanel view, String title) {
+        // Limpar o conteúdo atual
+        dashboard.getContentPane().removeAll();
+
+        // Adicionar a nova tela
+        dashboard.getContentPane().setLayout(new BorderLayout());
+        dashboard.getContentPane().add(view, BorderLayout.CENTER);
+
+        // Atualizar título
+        dashboard.setTitle("Sistema Bancário - " + title);
+
+        // Atualizar a interface
+        dashboard.revalidate();
+        dashboard.repaint();
+
+        System.out.println("Mostrando tela: " + title);
     }
 
     public void handleLogin() {

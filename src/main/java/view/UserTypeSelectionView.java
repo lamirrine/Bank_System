@@ -1,4 +1,3 @@
-// view/UserTypeSelectionView.java
 package view;
 
 import javax.swing.*;
@@ -164,10 +163,12 @@ public class UserTypeSelectionView extends JFrame {
     }
 
     public void addClientListener(ActionListener listener) {
+        System.out.println("Listener de cliente adicionado");
         clientButton.addActionListener(listener);
     }
 
     public void addEmployeeListener(ActionListener listener) {
+        System.out.println("Listener de funcionário adicionado");
         employeeButton.addActionListener(listener);
     }
 }

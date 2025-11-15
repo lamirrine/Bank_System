@@ -1,19 +1,30 @@
 package model.services;
 
+import model.dao.IAccountDAO;
 import model.dao.ICustomerDAO;
+import model.dao.ITransactionDAO;
 import model.dao.IUserDAO;
 import model.dao.impl.CustomerDAO;
+import model.dao.impl.EmployeeDAO;
 import model.dao.impl.UserDAO;
+import model.entities.Account;
 import model.entities.Customer;
+import model.entities.Transaction;
 import model.entities.User;
 import utils.PasswordUtil;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CustomerService {
 
     private IUserDAO userDAO;
     private ICustomerDAO customerDAO;
+    private IAccountDAO accountDAO;
+    private ITransactionDAO transactionDAO;
 
     public CustomerService(IUserDAO userDAO) {
         this.userDAO = userDAO;
@@ -37,6 +48,61 @@ public class CustomerService {
             return customerDAO.findById(customerId);
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    // No CustomerService.java, adicione:
+    public List<Customer> findAllCustomers() {
+        return customerDAO.findAll();
+    }
+
+    // No AccountService.java, adcione:
+    public List<Account> getAllAccounts() {
+        try {
+            return accountDAO.findAll();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar contas: " + e.getMessage(), e);
+        }
+    }
+
+    public List<Customer> searchCustomers(String searchTerm) {
+        try {
+            return customerDAO.findBySearchTerm(searchTerm);
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar clientes: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Obtém estatísticas dos clientes
+     */
+    public Map<String, Object> getCustomerStats() {
+        Map<String, Object> stats = new HashMap<>();
+        try {
+            List<Customer> customers = customerDAO.findAll();
+
+            long totalCustomers = customers.size();
+            // Aqui você pode adicionar mais estatísticas conforme necessário
+            // Por exemplo: clientes ativos, novos clientes este mês, etc.
+
+            stats.put("totalCustomers", totalCustomers);
+            stats.put("activeCustomers", totalCustomers); // Por enquanto, assumimos que todos estão ativos
+
+        } catch (Exception e) {
+            System.err.println("Erro ao calcular estatísticas de clientes: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return stats;
+    }
+
+    // No StatementService.java, adicione:
+    public List<Transaction> getAllTransactions() {
+        try {
+            return transactionDAO.findAll();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar transações: " + e.getMessage(), e);
         }
     }
 

@@ -11,6 +11,8 @@ public interface ICustomerDAO {
     void save(Customer customer) throws SQLException;
     void update(Customer customer) throws SQLException;
 
+    List<Customer> findBySearchTerm(String searchTerm) throws SQLException;
+
     Customer findByEmail(String email);
 
     List<Customer> findAll();
