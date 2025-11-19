@@ -64,7 +64,7 @@ bank_system/
         │   │       ├── EmployeeService.java
         │   │       └── StatementService.java
         │   │
-        │   ├── utils/
+        │   ├── model.utils/
         │   │   └── security/
         │   │       ├── PasswordUtil.java
         │   │       └── PinUtil.java

@@ -9,23 +9,22 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-public class EmployeeLoginView extends JDialog {
+public class EmployeeLoginView extends JFrame {
     private MyTextField emailField;
     private MyPasswordField passwordField;
     private Button loginButton;
     private Button backButton;
     private JFrame parent;
 
-    public EmployeeLoginView(JFrame parent) {
-        super(parent, "Login - Funcionário", true);
-        this.parent = parent;
+    public EmployeeLoginView() {
+
         initializeUI();
         setLocationRelativeTo(parent);
     }
 
     private void initializeUI() {
         setLayout(new MigLayout("wrap, fill, insets 30", "[grow]", "[]20[]10[]10[]20[]"));
-        setSize(800, 900);
+        setSize(700, 600);
         setResizable(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -70,14 +69,14 @@ public class EmployeeLoginView extends JDialog {
         backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         backButton.setBackground(new Color(107, 114, 128));
         backButton.setFocusPainted(false);
-        buttonPanel.add(backButton, "growx");
+        buttonPanel.add(backButton, "w 40%, h 40");
 
         loginButton = new Button();
         loginButton.setText("Entrar");
         loginButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         loginButton.setBackground(new Color(39, 174, 96));
         loginButton.setFocusPainted(false);
-        buttonPanel.add(loginButton, "growx");
+        buttonPanel.add(loginButton, "w 40%, h 40");
 
         add(buttonPanel, "growx, span");
 

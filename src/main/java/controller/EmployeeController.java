@@ -5,8 +5,9 @@ import model.services.EmployeeService;
 import model.services.CustomerService;
 import model.services.AccountService;
 import model.services.StatementService;
-import view.EmployeeDashboardView;
+import view.admin.EmployeeDashboardView;
 import view.UserTypeSelectionView;
+import view.admin.EmployeeManagementView;
 import view.login.componet.EmployeeLoginView;
 
 import javax.swing.*;
@@ -21,22 +22,23 @@ public class EmployeeController {
     private StatementService statementService;
     private Employee currentEmployee;
 
-    public EmployeeController(EmployeeService employeeService, JFrame parentFrame) {
+    public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
         this.customerService = new CustomerService();
         this.accountService = new AccountService();
         this.statementService = new StatementService();
 
-        initializeViews(parentFrame);
+        initializeViews();
         setupControllers();
     }
 
-    private void initializeViews(JFrame parentFrame) {
+    private void initializeViews() {
         // Criar login view com parent frame
-        loginView = new EmployeeLoginView(parentFrame);
+        loginView = new EmployeeLoginView();
 
         // Criar dashboard
         dashboardView = new EmployeeDashboardView();
+        dashboardView.setVisible(true);
         dashboardView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
@@ -195,13 +197,33 @@ public class EmployeeController {
         }
 
         try {
-            List<Employee> employees = employeeService.getAllEmployees();
-            JOptionPane.showMessageDialog(dashboardView,
-                    "Gestão de Funcionários\nTotal de funcionários: " + employees.size() + "\nFuncionalidade em desenvolvimento completo.",
-                    "Gestão de Funcionários", JOptionPane.INFORMATION_MESSAGE);
+            System.out.println("=== INICIANDO GESTÃO DE FUNCIONÁRIOS ===");
+
+            // Criar JFrame
+            JFrame managementFrame = new JFrame("Gestão de Funcionários");
+            managementFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            managementFrame.setSize(1200, 800);
+            managementFrame.setLocationRelativeTo(dashboardView);
+
+            // Criar a view
+            EmployeeManagementView managementView = new EmployeeManagementView();
+
+            // Criar o controlador - IMPORTANTE: passar a view e o service
+            EmployeeManagementController managementController = new EmployeeManagementController(
+                    managementView,
+                    employeeService
+            );
+
+            // Adicionar ao frame
+            managementFrame.setContentPane(managementView);
+            managementFrame.setVisible(true);
+
+            System.out.println("=== GESTÃO DE FUNCIONÁRIOS PRONTA ===");
+
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(dashboardView,
-                    "Erro ao carregar funcionários: " + e.getMessage(),
+                    "Erro: " + e.getMessage(),
                     "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }

@@ -1,4 +1,4 @@
-package utils;
+package model.utils;
 
 /**
  * Utilitário para gerenciar o PIN de transação (4 dígitos).

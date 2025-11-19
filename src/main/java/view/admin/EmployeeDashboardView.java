@@ -1,5 +1,4 @@
-// EmployeeDashboardView.java - VERSÃO CORRIGIDA
-package view;
+package view.admin;
 
 import net.miginfocom.swing.MigLayout;
 import view.componet.MyButton;
@@ -16,7 +15,7 @@ public class EmployeeDashboardView extends JFrame {
     private MyButton logoutBtn;
     private JLabel welcomeLabel;
     private JLabel userInfoLabel;
-    private JPanel mainContentPanel; // PAINEL PRINCIPAL SEMPRE VISÍVEL
+    private JPanel mainContentPanel;
 
     public EmployeeDashboardView() {
         initializeUI();
@@ -34,10 +33,8 @@ public class EmployeeDashboardView extends JFrame {
     }
 
     private void initializeComponents() {
-        // Header no topo
         add(createHeader(), BorderLayout.NORTH);
 
-        // Conteúdo principal SEMPRE com as 5 opções
         mainContentPanel = createMainContent();
         add(mainContentPanel, BorderLayout.CENTER);
     }
@@ -116,14 +113,6 @@ public class EmployeeDashboardView extends JFrame {
                 "Gerencie equipe, defina permissões e acessos",
                 new Color(245, 158, 11),
                 "Gerenciar Equipe"
-        ), "grow");
-
-        // Card 5: Relatórios
-        content.add(createDashboardCard(
-                "📈 Relatórios",
-                "Gere relatórios financeiros e estatísticas",
-                new Color(239, 68, 68),
-                "Gerar Relatórios"
         ), "grow");
 
         return content;

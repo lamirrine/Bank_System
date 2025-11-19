@@ -3,6 +3,7 @@ package controller;
 import model.entities.*;
 import model.services.*;
 import view.*;
+import view.admin.*;
 import view.login.componet.CreateAccountPinView;
 import view.login.componet.EmployeeLoginView;
 import view.login.componet.Loginview;
@@ -54,7 +55,7 @@ public class AuthenticationController {
     private void showEmployeeLogin() {
         typeSelectionView.setVisible(false);
 
-        EmployeeLoginView employeeLoginView = new EmployeeLoginView(typeSelectionView);
+        EmployeeLoginView employeeLoginView = new EmployeeLoginView();
 
         // Listener para voltar
         employeeLoginView.addBackListener(e -> {
@@ -197,34 +198,6 @@ public class AuthenticationController {
         }
     }
 
-    private void showReports(EmployeeDashboardView dashboard, ReportsView reportsView) {
-        // Configurar botão voltar
-        reportsView.getBackBtn().addActionListener(e -> {
-            dashboard.getContentPane().remove(reportsView);
-            dashboard.revalidate();
-            dashboard.repaint();
-        });
-
-        // Configurar gerar relatório
-        reportsView.getGenerateBtn().addActionListener(e -> {
-            String reportType = reportsView.getReportType();
-            String content = "=== RELATÓRIO: " + reportType + " ===\n\n";
-            content += "Período: " + reportsView.getDateFrom() + " a " + reportsView.getDateTo() + "\n\n";
-            content += "Dados de exemplo:\n";
-            content += "- Total de clientes: 150\n";
-            content += "- Total de contas: 180\n";
-            content += "- Saldo total: MZN 2.500.000,00\n";
-            content += "- Transações este mês: 1.250\n";
-            reportsView.setReportContent(content);
-        });
-
-        // Mostrar no dashboard
-        dashboard.getContentPane().removeAll();
-        dashboard.getContentPane().add(reportsView, "grow");
-        dashboard.revalidate();
-        dashboard.repaint();
-    }
-
     private void handleEmployeeLogin(EmployeeLoginView loginView) {
         String email = loginView.getEmail();
         String password = loginView.getPassword();
@@ -256,6 +229,7 @@ public class AuthenticationController {
 
     private void openEmployeeDashboard(Employee employee) {
         EmployeeDashboardView dashboardView = new EmployeeDashboardView();
+        dashboardView.setVisible(true);
 
         dashboardView.setUserInfo(
                 employee.getFullName(),
@@ -284,21 +258,59 @@ public class AuthenticationController {
             openTransactionView(dashboardView);
         });
 
-        // FUNCIONÁRIOS - Abrir em dialog (apenas admin)
         if (employee.getAccessLevel() == model.enums.AccessLevel.ADMIN) {
             dashboardView.getManageEmployeesBtn().addActionListener(e -> {
-                openEmployeeManagement(dashboardView);
+                // ✅ PASSAR O EMPLOYEE ATUAL PARA O CONTROLLER
+                openEmployeeManagement(dashboardView, employee);
             });
         } else {
             dashboardView.getManageEmployeesBtn().setVisible(false);
         }
 
-        // RELATÓRIOS - Abrir em dialog
-        dashboardView.getReportsBtn().addActionListener(e -> {
-            openReports(dashboardView);
-        });
-
         dashboardView.setVisible(true);
+    }
+
+    private void openEmployeeManagement(JFrame parent, Employee currentEmployee) {
+        JDialog dialog = new JDialog(parent, "Gestão de Funcionários", true);
+        dialog.setSize(1920, 1080);
+        dialog.setLocationRelativeTo(parent);
+
+        EmployeeManagementView employeeView = new EmployeeManagementView();
+
+        try {
+            // CARREGAR DADOS REAIS
+            EmployeeService employeeService = new EmployeeService();
+
+            // ✅ CRIAR O CONTROLLER PASSANDO O EMPLOYEE ATUAL
+            EmployeeManagementController employeeController = new EmployeeManagementController(
+                    employeeView,
+                    employeeService,
+                    currentEmployee  // Passar o employee atual
+            );
+
+            java.util.List<Employee> employees = employeeService.getAllEmployees();
+            employeeView.setEmployees(employees);
+
+            int admins = 0, managers = 0, staff = 0;
+            for (Employee emp : employees) {
+                switch (emp.getAccessLevel()) {
+                    case ADMIN: admins++; break;
+                    case MANAGER: managers++; break;
+                    case STAFF: staff++; break;
+                }
+            }
+            employeeView.setStats(employees.size(), admins, managers, staff);
+        } catch (Exception ex) {
+            employeeView.setEmployees(new ArrayList<>());
+            employeeView.setStats(0, 0, 0, 0);
+            ex.printStackTrace();
+        }
+
+        // ✅ ADICIONAR LISTENER EXTRA PARA FECHAR O DIALOG
+        employeeView.addBackListener(e -> dialog.dispose());
+
+        dialog.add(employeeView);
+        dialog.setVisible(true);
     }
 
     private void openCustomerManagement(JFrame parent) {
@@ -438,6 +450,13 @@ public class AuthenticationController {
         try {
             // CARREGAR DADOS REAIS
             EmployeeService employeeService = new EmployeeService();
+
+            // CRIAR O CONTROLLER - ISSO É O QUE ESTAVA FALTANDO!
+            EmployeeManagementController employeeController = new EmployeeManagementController(
+                    employeeView,
+                    employeeService
+            );
+
             java.util.List<Employee> employees = employeeService.getAllEmployees();
             employeeView.setEmployees(employees);
 
@@ -455,52 +474,9 @@ public class AuthenticationController {
             employeeView.setStats(0, 0, 0, 0);
         }
 
-        // Configurar botão voltar
-        employeeView.getBackBtn().addActionListener(e -> dialog.dispose());
-
-        // Configurar botão adicionar funcionário
-        employeeView.getAddEmployeeBtn().addActionListener(e -> {
-            JOptionPane.showMessageDialog(dialog, "Adicionando novo funcionário...");
-        });
-
-        // Configurar botão editar
-        employeeView.getEditEmployeeBtn().addActionListener(e -> {
-            int employeeId = employeeView.getSelectedEmployeeId();
-            if (employeeId != -1) {
-                JOptionPane.showMessageDialog(dialog, "Editando funcionário ID: " + employeeId);
-            } else {
-                JOptionPane.showMessageDialog(dialog, "Selecione um funcionário primeiro");
-            }
-        });
+        employeeView.addBackListener(e -> dialog.dispose());
 
         dialog.add(employeeView);
-        dialog.setVisible(true);
-    }
-
-    private void openReports(JFrame parent) {
-        JDialog dialog = new JDialog(parent, "Relatórios", true);
-        dialog.setSize(1920, 1080);
-        dialog.setLocationRelativeTo(parent);
-
-        ReportsView reportsView = new ReportsView();
-
-        // Configurar botão voltar
-        reportsView.getBackBtn().addActionListener(e -> dialog.dispose());
-
-        // Configurar gerar relatório
-        reportsView.getGenerateBtn().addActionListener(e -> {
-            String reportType = reportsView.getReportType();
-            String content = "=== RELATÓRIO: " + reportType + " ===\n\n";
-            content += "Período: " + reportsView.getDateFrom() + " a " + reportsView.getDateTo() + "\n\n";
-            content += "Dados de exemplo:\n";
-            content += "- Total de clientes: 150\n";
-            content += "- Total de contas: 180\n";
-            content += "- Saldo total: MZN 2.500.000,00\n";
-            content += "- Transações este mês: 1.250\n";
-            reportsView.setReportContent(content);
-        });
-
-        dialog.add(reportsView);
         dialog.setVisible(true);
     }
 

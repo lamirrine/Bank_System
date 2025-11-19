@@ -1,4 +1,4 @@
-package utils;
+package model.utils;
 
 import java.nio.charset.StandardCharsets; // ADICIONAR ESTA IMPORTAÇÃO
 import java.security.MessageDigest;

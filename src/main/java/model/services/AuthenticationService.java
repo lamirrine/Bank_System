@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.HashMap;
 import model.exceptions.DomainException;
 import model.exceptions.InvalidCredentialsException;
-import utils.PasswordUtil;
-import utils.PinUtil;
+import model.utils.PasswordUtil;
+import model.utils.PinUtil;
 
 public class AuthenticationService {
 

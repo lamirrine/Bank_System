@@ -1,6 +1,6 @@
 package main;
 
-import utils.PasswordUtil;
+import model.utils.PasswordUtil;
 
 // Teste para gerar hash de senha
 public class PasswordTest {

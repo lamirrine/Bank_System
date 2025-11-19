@@ -5,7 +5,7 @@ import model.dao.IAccountDAO;
 import model.dao.impl.UserDAO;
 import model.dao.impl.AccountDAO;
 import model.entities.User;
-import utils.PasswordUtil;
+import model.utils.PasswordUtil;
 
 import java.sql.SQLException;
 

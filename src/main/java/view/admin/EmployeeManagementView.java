@@ -1,5 +1,5 @@
 // EmployeeManagementView.java
-package view;
+package view.admin;
 
 import model.entities.Employee;
 import net.miginfocom.swing.MigLayout;
@@ -8,6 +8,7 @@ import view.componet.MyButton;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class EmployeeManagementView extends JPanel {
 
     public EmployeeManagementView() {
         initializeUI();
+        System.out.println("=== EmployeeManagementView CONSTRUÍDA ===");
     }
 
     private void initializeUI() {
@@ -37,6 +39,8 @@ public class EmployeeManagementView extends JPanel {
 
         // Footer
         add(createFooter(), "growx");
+
+        System.out.println("=== UI INICIALIZADA ===");
     }
 
     private JPanel createHeader() {
@@ -52,6 +56,11 @@ public class EmployeeManagementView extends JPanel {
         addEmployeeBtn.setText("+ Novo Funcionário");
         addEmployeeBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         addEmployeeBtn.setBackground(new Color(16, 185, 129));
+
+        // Listener de debug
+        addEmployeeBtn.addActionListener(e -> {
+            System.out.println("=== BOTÃO ADICIONAR CLICADO NA VIEW ===");
+        });
 
         header.add(titleLabel, "grow");
         header.add(addEmployeeBtn);
@@ -108,20 +117,36 @@ public class EmployeeManagementView extends JPanel {
         backBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         backBtn.setBackground(new Color(107, 114, 128));
 
+        backBtn.addActionListener(e -> {
+            System.out.println("=== BOTÃO VOLTAR CLICADO NA VIEW ===");
+        });
+
         editEmployeeBtn = new MyButton();
         editEmployeeBtn.setText("Editar");
         editEmployeeBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         editEmployeeBtn.setBackground(new Color(59, 130, 246));
+
+        editEmployeeBtn.addActionListener(e -> {
+            System.out.println("=== BOTÃO EDITAR CLICADO NA VIEW ===");
+        });
 
         changeAccessBtn = new MyButton();
         changeAccessBtn.setText("Alterar Acesso");
         changeAccessBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         changeAccessBtn.setBackground(new Color(245, 158, 11));
 
+        changeAccessBtn.addActionListener(e -> {
+            System.out.println("=== BOTÃO ALTERAR ACESSO CLICADO NA VIEW ===");
+        });
+
         deactivateBtn = new MyButton();
         deactivateBtn.setText("Desativar");
         deactivateBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         deactivateBtn.setBackground(new Color(239, 68, 68));
+
+        deactivateBtn.addActionListener(e -> {
+            System.out.println("=== BOTÃO DESATIVAR CLICADO NA VIEW ===");
+        });
 
         footer.add(backBtn);
         footer.add(editEmployeeBtn);
@@ -129,6 +154,32 @@ public class EmployeeManagementView extends JPanel {
         footer.add(deactivateBtn);
 
         return footer;
+    }
+
+    // MÉTODOS PARA ADICIONAR LISTENERS EXTERNOS
+    public void addAddEmployeeListener(ActionListener listener) {
+        addEmployeeBtn.addActionListener(listener);
+        System.out.println("Listener ADD configurado no botão!");
+    }
+
+    public void addEditEmployeeListener(ActionListener listener) {
+        editEmployeeBtn.addActionListener(listener);
+        System.out.println("Listener EDIT configurado no botão!");
+    }
+
+    public void addChangeAccessListener(ActionListener listener) {
+        changeAccessBtn.addActionListener(listener);
+        System.out.println("Listener ACCESS configurado no botão!");
+    }
+
+    public void addDeactivateListener(ActionListener listener) {
+        deactivateBtn.addActionListener(listener);
+        System.out.println("Listener DEACTIVATE configurado no botão!");
+    }
+
+    public void addBackListener(ActionListener listener) {
+        backBtn.addActionListener(listener);
+        System.out.println("Listener BACK configurado no botão!");
     }
 
     public void setEmployees(List<Employee> employees) {
@@ -165,7 +216,7 @@ public class EmployeeManagementView extends JPanel {
         return -1;
     }
 
-    // Getters
+    // Getters (mantenha para compatibilidade)
     public MyButton getBackBtn() { return backBtn; }
     public MyButton getAddEmployeeBtn() { return addEmployeeBtn; }
     public MyButton getEditEmployeeBtn() { return editEmployeeBtn; }

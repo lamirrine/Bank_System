@@ -78,7 +78,7 @@ public class AccountService {
             String accountNumber = generateAccountNumber();
 
             // Criar hash do PIN
-            String pinHash = utils.PasswordUtil.hashPassword(pin);
+            String pinHash = model.utils.PasswordUtil.hashPassword(pin);
 
             // Determinar tipo de conta
             model.enums.AccountType type = model.enums.AccountType.valueOf(accountType.toUpperCase());

@@ -1,5 +1,5 @@
 // TransactionView.java
-package view;
+package view.admin;
 
 import model.entities.Transaction;
 import net.miginfocom.swing.MigLayout;

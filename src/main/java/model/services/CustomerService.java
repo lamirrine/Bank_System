@@ -1,18 +1,21 @@
 package model.services;
 
+import config.DatabaseConnection;
 import model.dao.IAccountDAO;
 import model.dao.ICustomerDAO;
 import model.dao.ITransactionDAO;
 import model.dao.IUserDAO;
 import model.dao.impl.CustomerDAO;
-import model.dao.impl.EmployeeDAO;
 import model.dao.impl.UserDAO;
 import model.entities.Account;
 import model.entities.Customer;
 import model.entities.Transaction;
 import model.entities.User;
-import utils.PasswordUtil;
+import model.utils.PasswordUtil;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,12 +54,10 @@ public class CustomerService {
         }
     }
 
-    // No CustomerService.java, adicione:
     public List<Customer> findAllCustomers() {
         return customerDAO.findAll();
     }
 
-    // No AccountService.java, adcione:
     public List<Account> getAllAccounts() {
         try {
             return accountDAO.findAll();
@@ -64,6 +65,59 @@ public class CustomerService {
             throw new RuntimeException("Erro ao buscar contas: " + e.getMessage(), e);
         }
     }
+
+    public boolean deactivateCustomer(int customerId) {
+        try {
+            // Buscar a conta do cliente para verificar saldo
+            List<Account> accounts = accountDAO.findByCustomerId(customerId);
+
+            // Verificar se há saldo nas contas
+            for (Account account : accounts) {
+                if (account.getBalance() > 0) {
+                    throw new Exception("Cliente possui saldo em conta. Não pode ser desativado.");
+                }
+            }
+
+            // Atualizar status na tabela user (soft delete)
+            String sql = "UPDATE user SET user_type = 'INACTIVE' WHERE user_id = ?";
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+                stmt.setInt(1, customerId);
+                return stmt.executeUpdate() > 0;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao desativar cliente: " + e.getMessage());
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public boolean updateCustomer(Customer customer) {
+        try {
+            String sql = "UPDATE user SET first_name = ?, last_name = ?, email = ?, phone = ?, address = ? WHERE user_id = ?";
+
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+                stmt.setString(1, customer.getFirstName());
+                stmt.setString(2, customer.getLastName());
+                stmt.setString(3, customer.getEmail());
+                stmt.setString(4, customer.getPhone());
+                stmt.setString(5, customer.getAddress());
+                stmt.setInt(6, customer.getUserId());
+
+                return stmt.executeUpdate() > 0;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao atualizar cliente: " + e.getMessage());
+            return false;
+        }
+    }
+
 
     public List<Customer> searchCustomers(String searchTerm) {
         try {
@@ -75,9 +129,6 @@ public class CustomerService {
         }
     }
 
-    /**
-     * Obtém estatísticas dos clientes
-     */
     public Map<String, Object> getCustomerStats() {
         Map<String, Object> stats = new HashMap<>();
         try {
@@ -97,7 +148,6 @@ public class CustomerService {
         return stats;
     }
 
-    // No StatementService.java, adicione:
     public List<Transaction> getAllTransactions() {
         try {
             return transactionDAO.findAll();

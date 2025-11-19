@@ -1,5 +1,5 @@
 // AccountManagementView.java
-package view;
+package view.admin;
 
 import model.entities.Account;
 import net.miginfocom.swing.MigLayout;

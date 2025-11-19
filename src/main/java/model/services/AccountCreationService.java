@@ -7,7 +7,7 @@ import model.entities.Account;
 import model.entities.Customer;
 import model.enums.AccountStatus;
 import model.enums.AccountType;
-import utils.PasswordUtil;
+import model.utils.PasswordUtil;
 
 import java.sql.SQLException;
 import java.util.Date;

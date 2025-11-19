@@ -3,15 +3,13 @@ package model.services;
 import model.dao.*;
 import model.dao.impl.EmployeeDAO;
 import model.dao.impl.UserDAO;
-import model.entities.*;
 import model.enums.AccessLevel;
 import model.dao.IEmployeeDAO;
 import model.dao.IUserDAO;
 import model.entities.Employee;
-import utils.PasswordUtil;
-import model.enums.AccountStatus;
+import model.utils.PasswordUtil;
+
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
 
 public class EmployeeService {
@@ -43,6 +41,65 @@ public class EmployeeService {
 
     private boolean hasPermission(Employee employee, AccessLevel requiredLevel) {
         return employee.getAccessLevel().ordinal() >= requiredLevel.ordinal();
+    }
+
+    public boolean updateEmployee(Employee employee) throws SQLException {
+        try {
+            // Atualizar dados básicos do usuário
+            userDAO.update(employee);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Employee registerEmployee(String firstName, String lastName, String email,
+                                     String phone, String password, String address,
+                                     AccessLevel accessLevel, boolean isSupervisor) throws Exception {
+        // Validações
+        if (email == null || email.isEmpty()) {
+            throw new IllegalArgumentException("O email é obrigatório.");
+        }
+        if (password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("A senha é obrigatória.");
+        }
+
+        // Verificar se email já existe
+        var existingUser = userDAO.findByEmail(email);
+        if (existingUser != null) {
+            throw new IllegalArgumentException("Este email já está registrado.");
+        }
+
+        try {
+            // Hash da senha
+            String hashedPassword = PasswordUtil.hashPassword(password);
+
+            // Criar objeto Employee
+            Employee employee = new Employee(firstName, lastName, email, phone,
+                    hashedPassword, address, accessLevel, isSupervisor);
+
+            // Salvar na tabela user (isso deve gerar o user_id)
+            userDAO.save(employee);
+
+            // Agora salvar na tabela employee
+            employeeDAO.save(employee);
+
+            return employee;
+
+        } catch (SQLException e) {
+            throw new Exception("Falha no registro do funcionário: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean softDeleteEmployee(int employeeId) {
+        try {
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public Employee login(String email, String password) throws Exception {

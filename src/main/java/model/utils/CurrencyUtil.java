@@ -1,4 +1,4 @@
-package utils;
+package model.utils;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
