@@ -1,5 +1,6 @@
 package model.services;
 
+import config.DatabaseConnection;
 import model.dao.*;
 import model.dao.impl.EmployeeDAO;
 import model.dao.impl.UserDAO;
@@ -9,8 +10,11 @@ import model.dao.IUserDAO;
 import model.entities.Employee;
 import model.utils.PasswordUtil;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.*;
 
 public class EmployeeService {
 
@@ -45,12 +49,94 @@ public class EmployeeService {
 
     public boolean updateEmployee(Employee employee) throws SQLException {
         try {
-            // Atualizar dados básicos do usuário
-            userDAO.update(employee);
+            // Atualizar dados básicos na tabela user
+            String userSql = "UPDATE user SET first_name = ?, last_name = ?, email = ?, phone = ?, address = ? WHERE user_id = ?";
+
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(userSql)) {
+
+                stmt.setString(1, employee.getFirstName());
+                stmt.setString(2, employee.getLastName());
+                stmt.setString(3, employee.getEmail());
+                stmt.setString(4, employee.getPhone());
+                stmt.setString(5, employee.getAddress());
+                stmt.setInt(6, employee.getUserId());
+
+                stmt.executeUpdate();
+            }
+
+            // Atualizar dados específicos na tabela employee
+            String employeeSql = "UPDATE employee SET access_level = ?, is_supervisor = ? WHERE employee_id = ?";
+
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(employeeSql)) {
+
+                stmt.setString(1, employee.getAccessLevel().toString());
+                stmt.setBoolean(2, employee.isSupervisor());
+                stmt.setInt(3, employee.getUserId());
+
+                stmt.executeUpdate();
+            }
+
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public boolean deleteEmployee(int employeeId) {
+        Connection conn = null;
+        try {
+            conn = DatabaseConnection.getConnection();
+            conn.setAutoCommit(false); // Iniciar transação
+
+            // 1. Primeiro eliminar da tabela employee
+            String deleteEmployeeSQL = "DELETE FROM employee WHERE employee_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteEmployeeSQL)) {
+                stmt.setInt(1, employeeId);
+                int employeeRows = stmt.executeUpdate();
+
+                if (employeeRows == 0) {
+                    conn.rollback();
+                    return false; // Funcionário não encontrado na tabela employee
+                }
+            }
+
+            // 2. Depois eliminar da tabela user
+            String deleteUserSQL = "DELETE FROM user WHERE user_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteUserSQL)) {
+                stmt.setInt(1, employeeId);
+                int userRows = stmt.executeUpdate();
+
+                if (userRows == 0) {
+                    conn.rollback();
+                    return false; // Usuário não encontrado na tabela user
+                }
+            }
+
+            conn.commit(); // Confirmar transação
+            System.out.println("Funcionário ID " + employeeId + " eliminado com sucesso");
+            return true;
+
+        } catch (SQLException e) {
+            try {
+                if (conn != null) conn.rollback(); // Reverter em caso de erro
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            System.err.println("Erro ao eliminar funcionário: " + e.getMessage());
+            e.printStackTrace();
             return false;
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -92,15 +178,7 @@ public class EmployeeService {
         }
     }
 
-    public boolean softDeleteEmployee(int employeeId) {
-        try {
 
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     public Employee login(String email, String password) throws Exception {
         try {
@@ -171,11 +249,5 @@ public class EmployeeService {
             e.printStackTrace();
             return false;
         }
-    }
-
-    public boolean deleteEmployee(int employeeId) {
-        // Implementar lógica de exclusão (se necessário)
-        // Nota: Em sistemas reais, geralmente fazemos soft delete
-        return false;
     }
 }

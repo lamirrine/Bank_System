@@ -23,7 +23,6 @@ public class CustomerManagementView extends JPanel {
 
     public CustomerManagementView() {
         initializeUI();
-        setupButtonListeners();
         setupTableSelectionListener();
     }
 
@@ -64,88 +63,6 @@ public class CustomerManagementView extends JPanel {
         viewDetailsBtn.setBackground(enabled ? enabledColor : disabledColor);
         editCustomerBtn.setBackground(enabled ? enabledColorEdit : disabledColor);
         deactivateBtn.setBackground(enabled ? enabledColorDeactivate : disabledColor);
-    }
-
-    private void setupButtonListeners() {
-        // Botão Buscar
-        searchBtn.addActionListener(e -> {
-            String searchText = getSearchText();
-            if (!searchText.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                        "🔍 Buscando cliente: '" + searchText + "'\n" +
-                                "Funcionalidade de busca em desenvolvimento",
-                        "Buscar Cliente", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Digite um nome, email ou documento para buscar",
-                        "Campo Vazio", JOptionPane.WARNING_MESSAGE);
-            }
-        });
-
-        // Botão Ver Detalhes - AGORA COM VALIDAÇÃO
-        viewDetailsBtn.addActionListener(e -> {
-            if (!viewDetailsBtn.isEnabled()) {
-                showSelectionError();
-                return;
-            }
-
-            int customerId = getSelectedCustomerId();
-            String customerName = getSelectedCustomerName();
-
-            JOptionPane.showMessageDialog(this,
-                    "👤 DETALHES DO CLIENTE\n\n" +
-                            "ID: " + customerId + "\n" +
-                            "Nome: " + customerName + "\n" +
-                            "Email: " + getSelectedCustomerEmail() + "\n" +
-                            "Telefone: " + getSelectedCustomerPhone() + "\n" +
-                            "Documento: " + getSelectedCustomerDocument() + "\n" +
-                            "Data de Registo: " + getSelectedCustomerDate() + "\n\n" +
-                            "Funcionalidade completa em desenvolvimento",
-                    "Detalhes - " + customerName, JOptionPane.INFORMATION_MESSAGE);
-        });
-
-        // Botão Editar - AGORA COM VALIDAÇÃO
-        editCustomerBtn.addActionListener(e -> {
-            if (!editCustomerBtn.isEnabled()) {
-                showSelectionError();
-                return;
-            }
-
-            int customerId = getSelectedCustomerId();
-            String customerName = getSelectedCustomerName();
-
-        });
-
-        // Botão Desativar - AGORA COM VALIDAÇÃO E CONFIRMAÇÃO
-        deactivateBtn.addActionListener(e -> {
-            if (!deactivateBtn.isEnabled()) {
-                showSelectionError();
-                return;
-            }
-
-            int customerId = getSelectedCustomerId();
-            String customerName = getSelectedCustomerName();
-
-            int confirm = JOptionPane.showConfirmDialog(this,
-                    "🚫 DESATIVAR CLIENTE\n\n" +
-                            "Tem certeza que deseja desativar o cliente?\n\n" +
-                            "Cliente: " + customerName + "\n" +
-                            "ID: " + customerId + "\n\n" +
-                            "⚠️  Esta ação pode ser revertida posteriormente",
-                    "Confirmar Desativação",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE);
-
-            if (confirm == JOptionPane.YES_OPTION) {
-                JOptionPane.showMessageDialog(this,
-                        "✅ CLIENTE DESATIVADO\n\n" +
-                                "Cliente: " + customerName + "\n" +
-                                "ID: " + customerId + "\n\n" +
-                                "Status alterado para: INATIVO\n" +
-                                "Funcionalidade completa em desenvolvimento",
-                        "Desativação Concluída", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
     }
 
     private void showSelectionError() {

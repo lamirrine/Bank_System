@@ -211,7 +211,8 @@ public class EmployeeController {
             // Criar o controlador - IMPORTANTE: passar a view e o service
             EmployeeManagementController managementController = new EmployeeManagementController(
                     managementView,
-                    employeeService
+                    employeeService,
+                    currentEmployee
             );
 
             // Adicionar ao frame

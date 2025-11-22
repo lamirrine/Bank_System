@@ -15,7 +15,6 @@ public interface IEmployeeDAO {
 
     List<Employee> findAll();
 
-
     List<Employee> findByAccessLevel(AccessLevel accessLevel);
 
     void updateAccessLevel(int employeeId, AccessLevel accessLevel) throws SQLException;

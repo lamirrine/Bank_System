@@ -66,33 +66,113 @@ public class CustomerService {
         }
     }
 
-    public boolean deactivateCustomer(int customerId) {
+    public boolean deleteCustomer(int customerId) {
+        Connection conn = null;
         try {
-            // Buscar a conta do cliente para verificar saldo
-            List<Account> accounts = accountDAO.findByCustomerId(customerId);
+            conn = DatabaseConnection.getConnection();
+            conn.setAutoCommit(false); // Iniciar transação
 
-            // Verificar se há saldo nas contas
-            for (Account account : accounts) {
-                if (account.getBalance() > 0) {
-                    throw new Exception("Cliente possui saldo em conta. Não pode ser desativado.");
+            // 1. Primeiro eliminar transações das contas do cliente
+            String deleteTransactionsSQL = "DELETE t FROM transaction t " +
+                    "JOIN account a ON t.source_account_id = a.account_id " +
+                    "WHERE a.owner_customer_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteTransactionsSQL)) {
+                stmt.setInt(1, customerId);
+                stmt.executeUpdate();
+                System.out.println("Transações do cliente ID " + customerId + " eliminadas");
+            }
+
+            // 2. Eliminar contas do cliente
+            String deleteAccountsSQL = "DELETE FROM account WHERE owner_customer_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteAccountsSQL)) {
+                stmt.setInt(1, customerId);
+                int accountsDeleted = stmt.executeUpdate();
+                System.out.println(accountsDeleted + " contas do cliente ID " + customerId + " eliminadas");
+            }
+
+            // 3. Eliminar da tabela customer
+            String deleteCustomerSQL = "DELETE FROM customer WHERE customer_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteCustomerSQL)) {
+                stmt.setInt(1, customerId);
+                int customerRows = stmt.executeUpdate();
+
+                if (customerRows == 0) {
+                    conn.rollback();
+                    System.out.println("Cliente não encontrado na tabela customer");
+                    return false;
                 }
             }
 
-            // Atualizar status na tabela user (soft delete)
-            String sql = "UPDATE user SET user_type = 'INACTIVE' WHERE user_id = ?";
-            try (Connection conn = DatabaseConnection.getConnection();
-                 PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+            // 4. Eliminar da tabela user
+            String deleteUserSQL = "DELETE FROM user WHERE user_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteUserSQL)) {
                 stmt.setInt(1, customerId);
-                return stmt.executeUpdate() > 0;
+                int userRows = stmt.executeUpdate();
+
+                if (userRows == 0) {
+                    conn.rollback();
+                    System.out.println("Usuário não encontrado na tabela user");
+                    return false;
+                }
+            }
+
+            conn.commit(); // Confirmar transação
+            System.out.println("Cliente ID " + customerId + " e todos os dados associados eliminados com sucesso");
+            return true;
+
+        } catch (SQLException e) {
+            try {
+                if (conn != null) {
+                    conn.rollback(); // Reverter em caso de erro
+                    System.out.println("Transação revertida devido a erro");
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            System.err.println("Erro ao eliminar cliente: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public Map<String, Object> getCustomerAccountsInfo(int customerId) {
+        Map<String, Object> info = new HashMap<>();
+
+        String sql = "SELECT COUNT(*) as total_accounts, SUM(balance) as total_balance " +
+                "FROM account WHERE owner_customer_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, customerId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                info.put("totalAccounts", rs.getInt("total_accounts"));
+                info.put("totalBalance", rs.getDouble("total_balance"));
+                info.put("hasAccounts", rs.getInt("total_accounts") > 0);
             }
 
         } catch (SQLException e) {
-            System.err.println("Erro ao desativar cliente: " + e.getMessage());
-            return false;
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
         }
+
+        return info;
+    }
+
+    public boolean hasAccounts(int customerId) throws SQLException {
+        // Você precisará injetar o accountDAO e implementar esta verificação
+        // Por enquanto, retornamos false para teste
+        return false;
     }
 
     public boolean updateCustomer(Customer customer) {

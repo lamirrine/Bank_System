@@ -10,7 +10,9 @@ import view.login.componet.Loginview;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.color.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AuthenticationController {
     private UserTypeSelectionView typeSelectionView;
@@ -69,32 +71,6 @@ public class AuthenticationController {
         });
 
         employeeLoginView.setVisible(true);
-    }
-
-    private void showCustomerManagement(EmployeeDashboardView dashboard, CustomerManagementView customerView) {
-        try {
-            // Carregar dados
-            CustomerService customerService = new CustomerService();
-            java.util.List<Customer> customers = customerService.findAllCustomers();
-            customerView.setCustomers(customers);
-            customerView.setStats(customers.size(), customers.size());
-
-            // Configurar botão voltar
-            customerView.getBackBtn().addActionListener(e -> {
-                dashboard.getContentPane().remove(customerView);
-                dashboard.revalidate();
-                dashboard.repaint();
-            });
-
-            // Mostrar no dashboard
-            dashboard.getContentPane().removeAll();
-            dashboard.getContentPane().add(customerView, "grow");
-            dashboard.revalidate();
-            dashboard.repaint();
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(dashboard, "Erro ao carregar clientes: " + e.getMessage());
-        }
     }
 
     private void showAccountManagement(EmployeeDashboardView dashboard, AccountManagementView accountView) {
@@ -278,19 +254,19 @@ public class AuthenticationController {
         EmployeeManagementView employeeView = new EmployeeManagementView();
 
         try {
-            // CARREGAR DADOS REAIS
             EmployeeService employeeService = new EmployeeService();
 
-            // ✅ CRIAR O CONTROLLER PASSANDO O EMPLOYEE ATUAL
+            // ✅ IMPORTANTE: Passar o currentEmployee para o controller
             EmployeeManagementController employeeController = new EmployeeManagementController(
                     employeeView,
                     employeeService,
-                    currentEmployee  // Passar o employee atual
+                    currentEmployee  // Isso permite verificar se está tentando desativar a si mesmo
             );
 
-            java.util.List<Employee> employees = employeeService.getAllEmployees();
+            List<Employee> employees = employeeService.getAllEmployees();
             employeeView.setEmployees(employees);
 
+            // Atualizar estatísticas...
             int admins = 0, managers = 0, staff = 0;
             for (Employee emp : employees) {
                 switch (emp.getAccessLevel()) {
@@ -300,15 +276,14 @@ public class AuthenticationController {
                 }
             }
             employeeView.setStats(employees.size(), admins, managers, staff);
+
         } catch (Exception ex) {
             employeeView.setEmployees(new ArrayList<>());
             employeeView.setStats(0, 0, 0, 0);
             ex.printStackTrace();
         }
 
-        // ✅ ADICIONAR LISTENER EXTRA PARA FECHAR O DIALOG
         employeeView.addBackListener(e -> dialog.dispose());
-
         dialog.add(employeeView);
         dialog.setVisible(true);
     }
@@ -322,31 +297,22 @@ public class AuthenticationController {
 
         try {
             CustomerService customerService = new CustomerService();
-            java.util.List<Customer> customers = customerService.findAllCustomers();
+            CustomerManagementController customerController = new CustomerManagementController(
+                    customerView,
+                    customerService
+            );
+
+            List<Customer> customers = customerService.findAllCustomers();
             customerView.setCustomers(customers);
             customerView.setStats(customers.size(), customers.size());
         } catch (Exception ex) {
             customerView.setCustomers(new ArrayList<>());
             customerView.setStats(0, 0);
+            ex.printStackTrace();
         }
 
+        // ✅ REMOVER OS LISTENERS ANTIGOS E USAR APENAS O DO BACK
         customerView.getBackBtn().addActionListener(e -> dialog.dispose());
-
-        customerView.getSearchBtn().addActionListener(e -> {
-            String searchText = customerView.getSearchText();
-            if (!searchText.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Buscando por: " + searchText);
-            }
-        });
-
-        customerView.getViewDetailsBtn().addActionListener(e -> {
-            int customerId = customerView.getSelectedCustomerId();
-            if (customerId != -1) {
-                JOptionPane.showMessageDialog(dialog, "Visualizando detalhes do cliente ID: " + customerId);
-            } else {
-                JOptionPane.showMessageDialog(dialog, "Selecione um cliente primeiro");
-            }
-        });
 
         dialog.add(customerView);
         dialog.setVisible(true);
@@ -440,45 +406,6 @@ public class AuthenticationController {
         dialog.setVisible(true);
     }
 
-    private void openEmployeeManagement(JFrame parent) {
-        JDialog dialog = new JDialog(parent, "Gestão de Funcionários", true);
-        dialog.setSize(1920, 1080);
-        dialog.setLocationRelativeTo(parent);
-
-        EmployeeManagementView employeeView = new EmployeeManagementView();
-
-        try {
-            // CARREGAR DADOS REAIS
-            EmployeeService employeeService = new EmployeeService();
-
-            // CRIAR O CONTROLLER - ISSO É O QUE ESTAVA FALTANDO!
-            EmployeeManagementController employeeController = new EmployeeManagementController(
-                    employeeView,
-                    employeeService
-            );
-
-            java.util.List<Employee> employees = employeeService.getAllEmployees();
-            employeeView.setEmployees(employees);
-
-            int admins = 0, managers = 0, staff = 0;
-            for (Employee emp : employees) {
-                switch (emp.getAccessLevel()) {
-                    case ADMIN: admins++; break;
-                    case MANAGER: managers++; break;
-                    case STAFF: staff++; break;
-                }
-            }
-            employeeView.setStats(employees.size(), admins, managers, staff);
-        } catch (Exception ex) {
-            employeeView.setEmployees(new ArrayList<>());
-            employeeView.setStats(0, 0, 0, 0);
-        }
-
-        employeeView.addBackListener(e -> dialog.dispose());
-
-        dialog.add(employeeView);
-        dialog.setVisible(true);
-    }
 
     private void showView(EmployeeDashboardView dashboard, JPanel view, String title) {
         // Limpar o conteúdo atual
