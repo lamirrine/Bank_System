@@ -155,7 +155,6 @@ public class EmployeeDashboardView extends JFrame {
         card.add(descLabel, "growx");
         card.add(actionBtn, "growx, h 40!");
 
-        // Atribuir o botão à variável correspondente
         assignButtonToField(actionBtn, buttonText);
 
         return card;

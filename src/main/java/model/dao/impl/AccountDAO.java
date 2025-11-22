@@ -103,9 +103,90 @@ public class AccountDAO implements IAccountDAO {
         }
     }
 
-    @Override
-    public void updateStatus(int accountId, AccountStatus status) throws SQLException {
+    public boolean updateLimits(int accountId, double dailyWithdrawLimit, double dailyTransferLimit) throws SQLException {
+        String sql = "UPDATE account SET daily_withdraw_limit = ?, daily_transfer_limit = ? WHERE account_id = ?";
 
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setDouble(1, dailyWithdrawLimit);
+            stmt.setDouble(2, dailyTransferLimit);
+            stmt.setInt(3, accountId);
+
+            int rowsUpdated = stmt.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                System.out.println("✓ Limites atualizados com sucesso para conta ID: " + accountId);
+                return true;
+            } else {
+                System.out.println("✗ Nenhuma linha foi atualizada. Conta ID não encontrada: " + accountId);
+                return false;
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro SQL ao atualizar limites: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean updateStatus(int accountId, AccountStatus status) throws SQLException {
+        String sql = "UPDATE account SET status = ?, close_date = ? WHERE account_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, status.toString());
+
+            // Se status é FECHADA, seta a data de fechamento
+            if (status == AccountStatus.FECHADA) {
+                stmt.setTimestamp(2, new java.sql.Timestamp(System.currentTimeMillis()));
+            } else {
+                stmt.setNull(2, java.sql.Types.TIMESTAMP);
+            }
+
+            stmt.setInt(3, accountId);
+
+            int rowsUpdated = stmt.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                System.out.println("✓ Status atualizado com sucesso para conta ID: " + accountId + " - Novo status: " + status);
+                return true;
+            } else {
+                System.out.println("✗ Nenhuma linha foi atualizada. Conta ID não encontrada: " + accountId);
+                return false;
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro SQL ao atualizar status: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean updateBalanceSafe(int accountId, double newBalance) throws SQLException {
+        String sql = "UPDATE account SET balance = ? WHERE account_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setDouble(1, newBalance);
+            stmt.setInt(2, accountId);
+
+            int rowsUpdated = stmt.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                System.out.println("✓ Saldo atualizado para conta ID: " + accountId + " - Novo saldo: " + newBalance);
+                return true;
+            } else {
+                System.out.println("✗ Nenhuma linha foi atualizada. Conta ID não encontrada: " + accountId);
+                return false;
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro SQL ao atualizar saldo: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Override

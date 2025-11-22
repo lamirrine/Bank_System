@@ -102,7 +102,6 @@ public class DepositController {
                 });
             }
 
-            // Campos de valor rápido já estão configurados na view
         } catch (Exception e) {
             System.err.println("Erro ao configurar event listeners: " + e.getMessage());
         }
@@ -110,7 +109,6 @@ public class DepositController {
 
     private void setupValidation() {
         try {
-            // Validação em tempo real do campo de valor
             view.addAmountFieldListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {

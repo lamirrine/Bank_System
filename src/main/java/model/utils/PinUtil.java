@@ -13,7 +13,7 @@ public class PinUtil {
         if (plainPin == null || !plainPin.matches("\\d{4}")) {
             throw new IllegalArgumentException("O PIN deve conter exatamente 4 dígitos numéricos.");
         }
-        return PasswordUtil.hashPassword(plainPin); // Reutiliza a função de hash
+        return PasswordUtil.hashPassword(plainPin);
     }
 
     /**

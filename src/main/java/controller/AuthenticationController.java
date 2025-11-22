@@ -324,41 +324,17 @@ public class AuthenticationController {
         dialog.setLocationRelativeTo(parent);
 
         AccountManagementView accountView = new AccountManagementView();
+        AccountService accountService = new AccountService();
 
-        try {
-            // CARREGAR DADOS REAIS
-            AccountService accountService = new AccountService();
-            java.util.List<Account> accounts = accountService.getAllAccounts();
-            accountView.setAccounts(accounts);
+        // ✅ NOVO: Criar o controller
+        AccountManagementController controller = new AccountManagementController(
+                accountView,
+                accountService,
+                dialog
+        );
 
-            double totalBalance = 0;
-            int activeAccounts = 0;
-            for (Account acc : accounts) {
-                totalBalance += acc.getBalance();
-                if (acc.getStatus() == model.enums.AccountStatus.ATIVA) {
-                    activeAccounts++;
-                }
-            }
-            accountView.setStats(accounts.size(), activeAccounts, totalBalance);
-        } catch (Exception ex) {
-            accountView.setAccounts(new ArrayList<>());
-            accountView.setStats(0, 0, 0);
-        }
-
-        // Configurar botão voltar
-        accountView.getBackBtn().addActionListener(e -> dialog.dispose());
-
-        // Configurar botão filtrar
-        accountView.getSearchBtn().addActionListener(e -> {
-            String tipo = accountView.getTypeFilter();
-            String status = accountView.getStatusFilter();
-            JOptionPane.showMessageDialog(dialog, "Filtrando - Tipo: " + tipo + ", Status: " + status);
-        });
-
-        // Configurar botão nova conta
-        accountView.getOpenAccountBtn().addActionListener(e -> {
-            JOptionPane.showMessageDialog(dialog, "Abrindo nova conta...");
-        });
+        // Carregar dados iniciais
+        controller.loadAccounts();
 
         dialog.add(accountView);
         dialog.setVisible(true);

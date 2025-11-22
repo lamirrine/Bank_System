@@ -169,12 +169,6 @@ public class CustomerService {
         return info;
     }
 
-    public boolean hasAccounts(int customerId) throws SQLException {
-        // Você precisará injetar o accountDAO e implementar esta verificação
-        // Por enquanto, retornamos false para teste
-        return false;
-    }
-
     public boolean updateCustomer(Customer customer) {
         try {
             String sql = "UPDATE user SET first_name = ?, last_name = ?, email = ?, phone = ?, address = ? WHERE user_id = ?";
@@ -198,7 +192,6 @@ public class CustomerService {
         }
     }
 
-
     public List<Customer> searchCustomers(String searchTerm) {
         try {
             return customerDAO.findBySearchTerm(searchTerm);
@@ -215,8 +208,6 @@ public class CustomerService {
             List<Customer> customers = customerDAO.findAll();
 
             long totalCustomers = customers.size();
-            // Aqui você pode adicionar mais estatísticas conforme necessário
-            // Por exemplo: clientes ativos, novos clientes este mês, etc.
 
             stats.put("totalCustomers", totalCustomers);
             stats.put("activeCustomers", totalCustomers); // Por enquanto, assumimos que todos estão ativos

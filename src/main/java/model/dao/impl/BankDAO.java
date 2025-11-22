@@ -34,6 +34,6 @@ public class BankDAO implements IBankDAO {
 
     @Override
     public void updateInfo(Bank bank) throws SQLException {
-        // Lógica JDBC: UPDATE nas configurações (uso para ADMIN)
+        //UPDATE
     }
 }

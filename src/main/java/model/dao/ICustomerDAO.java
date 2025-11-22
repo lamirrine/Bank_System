@@ -1,13 +1,14 @@
 package model.dao;
 
 import model.entities.Customer;
+
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
 public interface ICustomerDAO {
     Customer findById(int customerId) throws SQLException;
 
-    // Persistência
     void save(Customer customer) throws SQLException;
     void update(Customer customer) throws SQLException;
 
@@ -16,4 +17,6 @@ public interface ICustomerDAO {
     Customer findByEmail(String email);
 
     List<Customer> findAll();
+
+    Customer mapResultSetToCustomer(ResultSet rs) throws SQLException;
 }

@@ -21,7 +21,7 @@ public class ChangeUserPasswordDialog extends JDialog {
 
     private void initComponents() {
         setLayout(new MigLayout("wrap, fill, insets 20", "[grow]", "[]10[]5[]10[]10[]10[]10[]"));
-        setSize(500, 500);
+        setSize(500, 550);
         setResizable(false);
 
         // Título

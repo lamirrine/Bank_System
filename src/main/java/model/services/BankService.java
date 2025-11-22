@@ -4,10 +4,6 @@ import model.dao.IBankDAO;
 import model.entities.Bank;
 import java.sql.SQLException;
 
-/**
- * Serviço para regras gerais e configurações globais do banco (Taxas, Contatos).
- * Implementa cache simples para evitar múltiplas buscas de DB.
- */
 public class BankService {
 
     private IBankDAO bankDAO;
@@ -57,7 +53,6 @@ public class BankService {
     public void updateBankConfiguration(Bank updatedBankInfo) throws Exception {
         try {
             bankDAO.updateInfo(updatedBankInfo);
-            // Invalida o cache para recarregar as novas informações na próxima chamada
             currentBankInfo = null;
         } catch (SQLException e) {
             throw new Exception("Falha ao atualizar configurações do banco.", e);

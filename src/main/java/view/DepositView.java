@@ -100,13 +100,11 @@ public class DepositView extends JPanel {
         ));
         amountField.setPreferredSize(new Dimension(200, 45));
 
-        // Error label - INICIALIZAR CORRETAMENTE
         errorLabel = new JLabel(" ");
         errorLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         errorLabel.setForeground(new Color(239, 68, 68));
         errorLabel.setVisible(false);
 
-        // Add currency prefix
         JPanel amountPanel = new JPanel(new BorderLayout());
         JLabel currencyLabel = new JLabel("MZN");
         currencyLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -197,7 +195,7 @@ public class DepositView extends JPanel {
         continueButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
         continueButton.setBackground(new Color(116, 185, 249));
 
-        // Adicionar efeitos hover aos botões
+        // Adicionar efeitos over aos botões
         cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (cancelButton.isEnabled()) {

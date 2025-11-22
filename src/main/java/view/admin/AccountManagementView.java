@@ -1,4 +1,4 @@
-// AccountManagementView.java
+// AccountManagementView.java - VERSÃO MELHORADA COM FUNCIONALIDADES
 package view.admin;
 
 import model.entities.Account;
@@ -32,13 +32,8 @@ public class AccountManagementView extends JPanel {
         setLayout(new MigLayout("fill, insets 20", "[grow]", "[][grow][]"));
         setBackground(new Color(229, 231, 235));
 
-        // Header
         add(createHeader(), "growx, wrap");
-
-        // Main content
         add(createMainContent(), "grow, wrap");
-
-        // Footer
         add(createFooter(), "growx");
     }
 
@@ -51,7 +46,6 @@ public class AccountManagementView extends JPanel {
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setForeground(new Color(15, 23, 42));
 
-        // Filters panel
         JPanel filterPanel = new JPanel(new MigLayout("insets 0", "[][][][]", "[]"));
         filterPanel.setBackground(Color.WHITE);
 
@@ -88,18 +82,15 @@ public class AccountManagementView extends JPanel {
         JPanel content = new JPanel(new MigLayout("fill, insets 0", "[grow]", "[][grow]"));
         content.setBackground(new Color(229, 231, 235));
 
-        // Stats panel
         statsLabel = new JLabel("Carregando estatísticas...");
         statsLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         statsLabel.setForeground(new Color(107, 114, 128));
         content.add(statsLabel, "growx, wrap");
 
-        // Table panel
         JPanel tablePanel = new JPanel(new MigLayout("fill", "[grow]", "[grow]"));
         tablePanel.setBackground(Color.WHITE);
         tablePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Create table
         String[] columns = {"Número", "Tipo", "Cliente", "Saldo", "Data Abertura", "Limite Lev.", "Limite Transf.", "Status"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -118,7 +109,6 @@ public class AccountManagementView extends JPanel {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         tablePanel.add(scrollPane, "grow");
-
         content.add(tablePanel, "grow");
 
         return content;
@@ -205,7 +195,11 @@ public class AccountManagementView extends JPanel {
         return (String) statusFilter.getSelectedItem();
     }
 
-    // Getters
+    public int getSelectedRowIndex() {
+        return accountsTable.getSelectedRow();
+    }
+
+    // ============ GETTERS DOS BOTÕES ============
     public MyButton getBackBtn() { return backBtn; }
     public MyButton getSearchBtn() { return searchBtn; }
     public MyButton getOpenAccountBtn() { return openAccountBtn; }

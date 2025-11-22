@@ -193,11 +193,6 @@ public class TransactionDAO implements ITransactionDAO {
         return transaction;
     }
 
-    // No TransactionDAO.java, adicione:
-
-    /**
-     * Busca todas as transações
-     */
     @Override
     public List<Transaction> findAll() throws SQLException {
         List<Transaction> transactions = new ArrayList<>();
@@ -214,9 +209,6 @@ public class TransactionDAO implements ITransactionDAO {
         return transactions;
     }
 
-    /**
-     * Busca transações com filtros
-     */
     @Override
     public List<Transaction> findByFilters(String type, String status, Date startDate, Date endDate) throws SQLException {
         List<Transaction> transactions = new ArrayList<>();
@@ -261,9 +253,6 @@ public class TransactionDAO implements ITransactionDAO {
         return transactions;
     }
 
-    /**
-     * Busca transações por intervalo de datas
-     */
     @Override
     public List<Transaction> findByDateRange(Date startDate, Date endDate) throws SQLException {
         List<Transaction> transactions = new ArrayList<>();

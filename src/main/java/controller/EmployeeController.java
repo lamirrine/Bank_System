@@ -103,7 +103,6 @@ public class EmployeeController {
             boolean isAdmin = currentEmployee.getAccessLevel() == model.enums.AccessLevel.ADMIN;
             dashboardView.setAdminFeaturesVisible(isAdmin);
 
-            // Mostrar dashboard
             dashboardView.setVisible(true);
             System.out.println("Dashboard do funcionário aberto com sucesso!");
 
@@ -208,14 +207,12 @@ public class EmployeeController {
             // Criar a view
             EmployeeManagementView managementView = new EmployeeManagementView();
 
-            // Criar o controlador - IMPORTANTE: passar a view e o service
             EmployeeManagementController managementController = new EmployeeManagementController(
                     managementView,
                     employeeService,
                     currentEmployee
             );
 
-            // Adicionar ao frame
             managementFrame.setContentPane(managementView);
             managementFrame.setVisible(true);
 

@@ -1,4 +1,3 @@
-// AccountCreationService.java
 package model.services;
 
 import model.dao.IAccountDAO;
@@ -48,7 +47,7 @@ public class AccountCreationService {
                     null, // Data de fechamento (null)
                     AccountStatus.ATIVA,
                     customer.getUserId(),
-                    1, // ID da agência padrão (ajuste conforme seu sistema)
+                    1,
                     3250.00, // Limite diário de levantamento padrão
                     10000.00, // Limite diário de transferência padrão
                     pinHash

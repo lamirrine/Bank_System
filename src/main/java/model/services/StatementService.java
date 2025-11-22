@@ -40,11 +40,6 @@ public class StatementService {
         }
     }
 
-    // No StatementService.java, adicione estes métodos:
-
-    /**
-     * Obtém todas as transações do sistema (para administração)
-     */
     public List<Transaction> getAllTransactions() {
         try {
             return transactionDAO.findAll();
@@ -55,9 +50,6 @@ public class StatementService {
         }
     }
 
-    /**
-     * Busca transações com filtros (para administração)
-     */
     public List<Transaction> findTransactionsByFilters(String type, String status, Date startDate, Date endDate) {
         try {
             return transactionDAO.findByFilters(type, status, startDate, endDate);
@@ -68,9 +60,6 @@ public class StatementService {
         }
     }
 
-    /**
-     * Obtém estatísticas gerais das transações
-     */
     public Map<String, Object> getTransactionStats(Date startDate, Date endDate) {
         Map<String, Object> stats = new HashMap<>();
         try {
@@ -107,7 +96,7 @@ public class StatementService {
         }
         return stats;
     }
-    // NOVO: Buscar transações por conta e período
+
     public List<Transaction> getTransactionsByAccountAndPeriod(int accountId, Date startDate, Date endDate) {
         try {
             List<Transaction> allTransactions = transactionDAO.findByAccountId(accountId, 1000); // Buscar muitas transações
@@ -118,7 +107,6 @@ public class StatementService {
         }
     }
 
-    // NOVO: Buscar transações por cliente e período
     public List<Transaction> getTransactionsByCustomerAndPeriod(int customerId, Date startDate, Date endDate) {
         try {
             List<Transaction> allTransactions = transactionDAO.findByCustomerId(customerId, 1000); // Buscar muitas transações
@@ -129,7 +117,6 @@ public class StatementService {
         }
     }
 
-    // NOVO: Buscar todas as transações de um cliente (sem limite)
     public List<Transaction> getAllTransactionsByCustomer(int customerId) {
         try {
             // Usar um número grande para buscar todas as transações
@@ -140,7 +127,6 @@ public class StatementService {
         }
     }
 
-    // NOVO: Buscar todas as transações de uma conta (sem limite)
     public List<Transaction> getAllTransactionsByAccount(int accountId) {
         try {
             // Usar um número grande para buscar todas as transações
@@ -186,7 +172,6 @@ public class StatementService {
         return cal.getTime();
     }
 
-    // NOVO: Calcular saldo total de todas as contas do cliente
     public double getTotalBalanceForCustomer(int customerId) {
         try {
             List<Transaction> recentTransactions = getRecentTransactionsByCustomer(customerId, 100);

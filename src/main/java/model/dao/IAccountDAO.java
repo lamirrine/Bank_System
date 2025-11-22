@@ -8,22 +8,23 @@ import java.sql.SQLException;
 public interface IAccountDAO {
     Account findById(int accountId) throws SQLException;
 
+    boolean updateBalanceSafe(int accountId, double newBalance) throws SQLException;
+
     List<Account> findByFilters(String accountType, String status) throws SQLException;
 
     List<Account> findAll() throws SQLException;
 
-    // Requisito de Transferência (busca por número de conta)
     Account findByAccountNumber(String accountNumber) throws SQLException;
 
-    // Requisito "Minhas Contas" (busca todas as contas de um cliente)
     List<Account> findByCustomerId(int customerId) throws SQLException;
 
-    // Persistência e Operações CRÍTICAS
     void save(Account account) throws SQLException;
 
     boolean updatePin(int accountId, String newPinHash) throws SQLException;
 
-    void updateStatus(int accountId, AccountStatus status) throws SQLException;
+    boolean updateLimits(int accountId, double dailyWithdrawLimit, double dailyTransferLimit) throws SQLException;
+
+    boolean updateStatus(int accountId, AccountStatus status) throws SQLException;
 
     boolean updateBalance(int accountId, double newBalance);
 

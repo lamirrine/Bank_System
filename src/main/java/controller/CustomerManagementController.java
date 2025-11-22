@@ -373,7 +373,7 @@ public class CustomerManagementController {
                     JOptionPane.ERROR_MESSAGE);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                // Executar ELIMINAÇÃO COMPLETA
+
                 boolean success = customerService.deleteCustomer(customerId);
 
                 if (success) {

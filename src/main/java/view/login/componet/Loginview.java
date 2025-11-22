@@ -182,7 +182,7 @@ public class Loginview extends JFrame {
 
         txtPassport = new MyTextField();
         txtPassport.setPrefixIcon(new ImageIcon(("/main/java/view/icon/pass.png")));
-        txtPassport.setHint("Passaporte (ESTRAGEIROS)");
+        txtPassport.setHint("Passaporte");
         register.add(txtPassport, "w 60%");
 
         txtNuit = new MyTextField();

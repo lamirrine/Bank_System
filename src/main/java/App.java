@@ -1,7 +1,5 @@
-package main;
-
 import controller.MainController;
-import controller.*;
+
 import javax.swing.*;
 
 public class App {

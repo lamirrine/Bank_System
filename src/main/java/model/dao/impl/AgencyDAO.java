@@ -34,11 +34,12 @@ public class AgencyDAO implements IAgencyDAO {
         }
     }
 
-    // ... Implementação dos outros métodos
     @Override
     public Agency findById(int agencyId) throws SQLException { return null; }
+
     @Override
-    public void save(Agency agency) throws SQLException { /* Lógica de INSERT */ }
+    public void save(Agency agency) throws SQLException { }
+
     @Override
-    public void update(Agency agency) throws SQLException { /* Lógica de UPDATE */ }
+    public void update(Agency agency) throws SQLException { /*UPDATE*/ }
 }

@@ -9,7 +9,6 @@ import java.util.List;
 
 public class CustomerDAO implements ICustomerDAO {
 
-
     @Override
     public void save(Customer customer) throws SQLException {
         if (customer.getUserId() == 0) {
@@ -123,8 +122,8 @@ public class CustomerDAO implements ICustomerDAO {
         return null;
     }
 
-
-    private Customer mapResultSetToCustomer(ResultSet rs) throws SQLException {
+    @Override
+    public Customer mapResultSetToCustomer(ResultSet rs) throws SQLException {
         return new Customer(
                 rs.getInt("user_id"),
                 rs.getString("first_name"),

@@ -2,10 +2,8 @@ package model.entities;
 
 import model.enums.UserType;
 
-// A classe Customer estende User, adicionando campos específicos de cliente.
 public class Customer extends User {
 
-    // Campos que SÃO ESPECÍFICOS DO CLIENTE (não estão em User)
     private String biNumber;
     private String nuit;
     private String passportNumber;
@@ -18,7 +16,6 @@ public class Customer extends User {
 
     // Construtor Completo (para Registo)
     public Customer(String firstName, String lastName, String email, String phone, String passHash, String address, String biNumber, String nuit, String passportNumber) {
-        // CORREÇÃO: Passa 'address' e 'userType' para o construtor da superclasse
         super(firstName, lastName, email, phone, passHash, address, UserType.valueOf("CUSTOMER"));
 
         this.biNumber = biNumber;
@@ -28,7 +25,6 @@ public class Customer extends User {
 
     // Construtor Usado para Carregamento (inclui userId)
     public Customer(int userId, String firstName, String lastName, String email, String phone, String passHash, String address, String biNumber, String nuit, String passportNumber) {
-        // CORREÇÃO: Passa 'address' e 'userType' para o construtor da superclasse
         super(userId, firstName, lastName, email, phone, passHash, address, UserType.valueOf("CUSTOMER"));
 
         this.biNumber = biNumber;
@@ -36,7 +32,7 @@ public class Customer extends User {
         this.passportNumber = passportNumber;
     }
 
-    // Getters e Setters... (apenas para campos de cliente)
+    // Getters e Setters
     public String getBiNumber() { return biNumber; }
     public void setBiNumber(String biNumber) { this.biNumber = biNumber; }
 

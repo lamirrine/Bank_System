@@ -52,7 +52,6 @@ public class AccountService {
 
     private AuthenticationService getAuthService() {
         if (authService == null) {
-            // Inicializa com as dependências necessárias
             this.authService = new AuthenticationService(null, this.accountDAO);
         }
         return authService;
@@ -97,7 +96,7 @@ public class AccountService {
                     null, // Data de fechamento (null)
                     model.enums.AccountStatus.ATIVA,
                     customerId,
-                    1, // ID da agência padrão (ajuste conforme necessário)
+                    1,
                     dailyWithdrawLimit,
                     dailyTransferLimit,
                     pinHash
@@ -156,9 +155,6 @@ public class AccountService {
         }
     }
 
-    /**
-     * Obtém estatísticas gerais das contas
-     */
     public Map<String, Object> getAccountStats() {
         Map<String, Object> stats = new HashMap<>();
         try {
@@ -197,6 +193,49 @@ public class AccountService {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public boolean updateAccountLimits(int accountId, double dailyWithdrawLimit, double dailyTransferLimit) {
+        try {
+            System.out.println("Atualizando limites da conta ID: " + accountId);
+            System.out.println("Novo limite de levantamento: " + dailyWithdrawLimit);
+            System.out.println("Novo limite de transferência: " + dailyTransferLimit);
+
+            return accountDAO.updateLimits(accountId, dailyWithdrawLimit, dailyTransferLimit);
+        } catch (Exception e) {
+            System.err.println("Erro ao atualizar limites: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateAccountStatus(int accountId, AccountStatus newStatus) {
+        try {
+            System.out.println("Atualizando status da conta ID: " + accountId + " para: " + newStatus);
+            return accountDAO.updateStatus(accountId, newStatus);
+        } catch (Exception e) {
+            System.err.println("Erro ao atualizar status: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Map<String, Object> getAccountStats(int accountId) {
+        Map<String, Object> stats = new HashMap<>();
+        try {
+            Account account = accountDAO.findById(accountId);
+            if (account != null) {
+                stats.put("accountNumber", account.getAccountNumber());
+                stats.put("balance", account.getBalance());
+                stats.put("status", account.getStatus());
+                stats.put("dailyWithdrawLimit", account.getDailyWithdrawLimit());
+                stats.put("dailyTransferLimit", account.getDailyTransferLimit());
+                stats.put("openDate", account.getOpenDate());
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao obter estatísticas: " + e.getMessage());
+        }
+        return stats;
     }
 
     public boolean updateAccountBalance(int accountId, double newBalance) {
@@ -272,7 +311,6 @@ public class AccountService {
 
             boolean transactionSaved = transactionDAO.save(transaction);
             if (!transactionSaved) {
-                // Em um sistema real, deveríamos reverter a atualização do saldo aqui
                 throw new Exception("Falha ao registrar transação.");
             }
 
@@ -286,7 +324,7 @@ public class AccountService {
             throw new Exception("Falha no sistema durante o depósito. Tente novamente.", e);
         } catch (Exception e) {
             System.err.println("Erro durante depósito: " + e.getMessage());
-            throw e; // Re-lança a exceção para tratamento superior
+            throw e;
         }
     }
 
@@ -370,7 +408,7 @@ public class AccountService {
             throw new Exception("Conta de origem ou destino não encontrada.");
         }
 
-        // 1. Validação de Segurança: PIN - CORRIGIDO para usar getAuthService()
+        // 1. Validação de Segurança: PIN
         try {
             if (!getAuthService().validatePin(sourceAccountId, pin)) {
                 throw new Exception("PIN de transação inválido.");

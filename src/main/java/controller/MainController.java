@@ -13,13 +13,10 @@ public class MainController {
 
     private void initializeServices() {
         try {
-            // Inicializar DAOs
             UserDAO userDAO = new UserDAO();
 
-            // Inicializar serviços
             AuthenticationService authService = new AuthenticationService(userDAO);
 
-            // Inicializar controller de autenticação
             authController = new AuthenticationController(authService);
 
         } catch (Exception e) {

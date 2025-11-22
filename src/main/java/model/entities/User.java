@@ -6,15 +6,14 @@ import java.util.Date;
 
 public class User {
 
-    // Campos principais (Comuns a TODOS os usuários: Cliente e Funcionário)
     protected int userId;
     protected String firstName;
     protected String lastName;
     protected String email;
     protected String phone;
     protected String passHash;
-    protected String address;       // <-- CORREÇÃO: ENDEREÇO ESTÁ AQUI
-    protected UserType userType;      // <-- userType ADICIONADO PARA O LOGIN
+    protected String address;
+    protected UserType userType;
     protected Date registrationDate;
 
     // Construtor completo (para carregamento do DB)
@@ -25,8 +24,8 @@ public class User {
         this.email = email;
         this.phone = phone;
         this.passHash = passHash;
-        this.address = address;       // Inicializado
-        this.userType = userType;     // Inicializado
+        this.address = address;
+        this.userType = userType;
         this.registrationDate = new Date();
     }
 
@@ -37,14 +36,12 @@ public class User {
         this.email = email;
         this.phone = phone;
         this.passHash = passHash;
-        this.address = address;       // Inicializado
-        this.userType = userType;     // Inicializado
+        this.address = address;
+        this.userType = userType;
         this.registrationDate = new Date();
     }
 
     //login
-
-
     public User(int userId, String email, String passHash) {
         this.userId = userId;
         this.email = email;
@@ -60,7 +57,6 @@ public class User {
     }
 
     // Getters e Setters
-
     public String getAddress() {
         return address;
     }

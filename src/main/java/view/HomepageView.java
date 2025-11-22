@@ -499,7 +499,6 @@ public class HomepageView extends JPanel {
     }
 
     // MÉTODO SIMPLES PARA ATUALIZAR LIMITES
-    // MÉTODO SIMPLES PARA ATUALIZAR LIMITES
     public void updateLimits(double dailyWithdrawLimit, double dailyTransferLimit) {
         System.out.println("Atualizando limites: " + dailyWithdrawLimit + ", " + dailyTransferLimit);
 

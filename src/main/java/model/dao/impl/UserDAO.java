@@ -161,7 +161,4 @@ public class UserDAO implements IUserDAO {
             throw e;
         }
     }
-
-    @Override
-    public String findUserType(int userId) throws SQLException { return null; }
 }
